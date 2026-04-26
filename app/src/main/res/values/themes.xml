@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MyMeditation" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/meditation_primary</item>
+        <item name="colorPrimaryDark">@color/meditation_primary_dark</item>
+        <item name="colorAccent">@color/meditation_accent</item>
+        <item name="android:windowBackground">@color/meditation_bg</item>
+    </style>
+</resources>
