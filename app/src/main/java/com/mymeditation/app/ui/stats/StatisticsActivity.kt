@@ -150,7 +150,7 @@ class StatisticsActivity : AppCompatActivity() {
         for (i in 1 until sortedDays.size) {
             val prevDate = dateFormat.parse(sortedDays[i - 1])
             val currDate = dateFormat.parse(sortedDays[i])
-            val diffMs = currDate.time - prevDate.time
+            val diffMs = (currDate?.time ?: 0L) - (prevDate?.time ?: 0L)
             val diffDays = diffMs / (24 * 60 * 60 * 1000)
 
             if (diffDays == 1L) {
