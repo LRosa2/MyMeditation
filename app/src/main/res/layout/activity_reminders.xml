@@ -19,6 +19,7 @@
         android:text="@string/no_reminders"
         android:gravity="center"
         android:textSize="16sp"
+        android:textColor="@color/meditation_text"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView

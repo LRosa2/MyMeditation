@@ -214,8 +214,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val names = sessions.map { it.name }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, names)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(this, R.layout.spinner_item_dark, names)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         binding.spinnerSession.adapter = adapter
 
         // Select default or last used session

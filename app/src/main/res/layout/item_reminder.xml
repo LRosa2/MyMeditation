@@ -46,7 +46,8 @@
         <CheckBox
             android:id="@+id/chkReminderEnabled"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="@color/meditation_text" />
 
         <ImageButton
             android:id="@+id/btnDeleteReminder"

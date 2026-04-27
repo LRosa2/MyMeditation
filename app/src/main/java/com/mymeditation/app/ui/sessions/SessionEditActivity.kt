@@ -72,10 +72,10 @@ class SessionEditActivity : AppCompatActivity() {
         // Setup type spinner
         val typeAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item_dark,
             listOf("Closed", "Open")
         )
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        typeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         binding.spinnerType.adapter = typeAdapter
 
         binding.spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
@@ -203,10 +203,10 @@ class SessionEditActivity : AppCompatActivity() {
         // Setup trigger type spinner
         val triggerTypeAdapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.spinner_item_dark,
             listOf("Ring Bell", "Play MP3 Track")
         )
-        triggerTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        triggerTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         spinnerType.adapter = triggerTypeAdapter
 
         spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {

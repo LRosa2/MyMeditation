@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/remember_volume"
+        android:textColor="@color/meditation_text"
         android:layout_marginBottom="8dp" />
 
     <CheckBox
@@ -18,6 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/play_as_alarm"
+        android:textColor="@color/meditation_text"
         android:layout_marginBottom="16dp" />
 
     <TextView
@@ -26,6 +28,7 @@
         android:text="@string/time_format"
         android:textSize="14sp"
         android:textStyle="bold"
+        android:textColor="@color/meditation_text"
         android:layout_marginBottom="4dp" />
 
     <RadioGroup
@@ -40,13 +43,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/time_format_24h"
+            android:textColor="@color/meditation_text"
             android:layout_marginEnd="16dp" />
 
         <RadioButton
             android:id="@+id/radio12h"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/time_format_12h" />
+            android:text="@string/time_format_12h"
+            android:textColor="@color/meditation_text" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton

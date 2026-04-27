@@ -81,6 +81,7 @@
         android:layout_height="wrap_content"
         android:text="@string/volume"
         android:textSize="14sp"
+        android:textColor="@color/meditation_text"
         android:layout_marginBottom="4dp" />
 
     <SeekBar
