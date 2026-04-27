@@ -107,4 +107,10 @@
     <string name="clear">Clear</string>
     <string name="trigger_start_label">Start</string>
     <string name="trigger_end_label">End</string>
+
+    <!-- Theme -->
+    <string name="theme_mode">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
 </resources>

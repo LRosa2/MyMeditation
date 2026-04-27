@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -39,17 +38,15 @@ class DurationPickerView @JvmOverloads constructor(
         updateDisplay()
     }
 
+    private fun formatHMS(seconds: Int): String {
+        val h = seconds / 3600
+        val m = (seconds % 3600) / 60
+        val s = seconds % 60
+        return String.format("%dH%02dM%02dS", h, m, s)
+    }
+
     private fun updateDisplay() {
-        val h = currentSeconds / 3600
-        val m = (currentSeconds % 3600) / 60
-        val s = currentSeconds % 60
-        editDuration.setText(if (h > 0) {
-            String.format("%dH%02dM%02dS", h, m, s)
-        } else if (m > 0) {
-            String.format("%dM%02dS", m, s)
-        } else {
-            String.format("%dS", s)
-        })
+        editDuration.setText(formatHMS(currentSeconds))
     }
 
     private fun showKeypadDialog() {
@@ -57,19 +54,20 @@ class DurationPickerView @JvmOverloads constructor(
         val txtDisplay = dialogView.findViewById<TextView>(R.id.txtDurationDisplay)
         val btnClear = dialogView.findViewById<MaterialButton>(R.id.btnClearDuration)
 
-        var tempSeconds = currentSeconds
+        // Store digits as a string, rightmost 2 = seconds, next 2 = minutes, rest = hours
+        var digits = ""
+
+        fun digitsToSeconds(): Int {
+            if (digits.isEmpty()) return 0
+            val padded = digits.padStart(6, '0')
+            val h = padded.substring(0, padded.length - 4).toIntOrNull() ?: 0
+            val m = padded.substring(padded.length - 4, padded.length - 2).toIntOrNull() ?: 0
+            val s = padded.substring(padded.length - 2).toIntOrNull() ?: 0
+            return h * 3600 + m * 60 + s
+        }
 
         fun updateTempDisplay() {
-            val h = tempSeconds / 3600
-            val m = (tempSeconds % 3600) / 60
-            val s = tempSeconds % 60
-            txtDisplay.text = if (h > 0) {
-                String.format("%dH%02dM%02dS", h, m, s)
-            } else if (m > 0) {
-                String.format("%dM%02dS", m, s)
-            } else {
-                String.format("%dS", s)
-            }
+            txtDisplay.text = formatHMS(digitsToSeconds())
         }
 
         val digitIds = intArrayOf(
@@ -79,37 +77,51 @@ class DurationPickerView @JvmOverloads constructor(
         )
         for (i in digitIds.indices) {
             dialogView.findViewById<MaterialButton>(digitIds[i]).setOnClickListener {
-                val newSeconds = tempSeconds * 10 + i
-                if (newSeconds <= 59999) {
-                    tempSeconds = newSeconds
+                if (digits.length < 6) {
+                    digits += i.toString()
                     updateTempDisplay()
                 }
             }
         }
 
         dialogView.findViewById<MaterialButton>(R.id.btnBackspace).setOnClickListener {
-            tempSeconds = tempSeconds / 10
-            updateTempDisplay()
+            if (digits.isNotEmpty()) {
+                digits = digits.dropLast(1)
+                updateTempDisplay()
+            }
         }
 
         btnClear.setOnClickListener {
-            tempSeconds = 0
+            digits = ""
             updateTempDisplay()
         }
 
+        // Initialize digits from currentSeconds
+        val h = currentSeconds / 3600
+        val m = (currentSeconds % 3600) / 60
+        val s = currentSeconds % 60
+        digits = if (h > 0) {
+            String.format("%d%02d%02d", h, m, s).trimStart('0').ifEmpty { "" }
+        } else if (m > 0) {
+            String.format("%d%02d", m, s).trimStart('0').ifEmpty { "" }
+        } else if (s > 0) {
+            s.toString()
+        } else {
+            ""
+        }
         updateTempDisplay()
 
         val dialog = AlertDialog.Builder(context)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                currentSeconds = tempSeconds
+                currentSeconds = digitsToSeconds()
                 updateDisplay()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create()
 
         dialogView.findViewById<MaterialButton>(R.id.btnOk).setOnClickListener {
-            currentSeconds = tempSeconds
+            currentSeconds = digitsToSeconds()
             updateDisplay()
             dialog.dismiss()
         }

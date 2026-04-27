@@ -54,6 +54,46 @@
             android:textColor="@color/meditation_text" />
     </RadioGroup>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/theme_mode"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/meditation_text"
+        android:layout_marginBottom="4dp" />
+
+    <RadioGroup
+        android:id="@+id/radioThemeMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/radioThemeLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_light"
+            android:textColor="@color/meditation_text"
+            android:layout_marginEnd="8dp" />
+
+        <RadioButton
+            android:id="@+id/radioThemeDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_dark"
+            android:textColor="@color/meditation_text"
+            android:layout_marginEnd="8dp" />
+
+        <RadioButton
+            android:id="@+id/radioThemeSystem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_system"
+            android:textColor="@color/meditation_text" />
+    </RadioGroup>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnExportDb"
         android:layout_width="match_parent"

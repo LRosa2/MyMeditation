@@ -19,24 +19,55 @@ class TriggerTimePickerView @JvmOverloads constructor(
     private val btnStart: MaterialButton
     private val btnEnd: MaterialButton
 
-    private var currentSeconds: Int = 0
-    private var isSpecial: Boolean = false // true if Start or End selected
-    private var specialValue: Int = 0 // TIME_START or TIME_END
+    private var digits: String = ""
+    private var isSpecial: Boolean = false
+    private var specialValue: Int = 0
 
     var value: Int
-        get() = if (isSpecial) specialValue else currentSeconds
+        get() = if (isSpecial) specialValue else digitsToSeconds()
         set(v) {
             if (v == TriggerEntity.TIME_START || v == TriggerEntity.TIME_END) {
                 isSpecial = true
                 specialValue = v
-                currentSeconds = 0
+                digits = ""
             } else {
                 isSpecial = false
                 specialValue = 0
-                currentSeconds = v
+                digits = secondsToDigits(v)
             }
             updateDisplay()
         }
+
+    private fun digitsToSeconds(): Int {
+        if (digits.isEmpty()) return 0
+        val padded = digits.padStart(6, '0')
+        val h = padded.substring(0, padded.length - 4).toIntOrNull() ?: 0
+        val m = padded.substring(padded.length - 4, padded.length - 2).toIntOrNull() ?: 0
+        val s = padded.substring(padded.length - 2).toIntOrNull() ?: 0
+        return h * 3600 + m * 60 + s
+    }
+
+    private fun secondsToDigits(seconds: Int): String {
+        val h = seconds / 3600
+        val m = (seconds % 3600) / 60
+        val s = seconds % 60
+        return if (h > 0) {
+            String.format("%d%02d%02d", h, m, s).trimStart('0').ifEmpty { "" }
+        } else if (m > 0) {
+            String.format("%d%02d", m, s).trimStart('0').ifEmpty { "" }
+        } else if (s > 0) {
+            s.toString()
+        } else {
+            ""
+        }
+    }
+
+    private fun formatHMS(seconds: Int): String {
+        val h = seconds / 3600
+        val m = (seconds % 3600) / 60
+        val s = seconds % 60
+        return String.format("%dH%02dM%02dS", h, m, s)
+    }
 
     init {
         orientation = VERTICAL
@@ -47,7 +78,6 @@ class TriggerTimePickerView @JvmOverloads constructor(
         btnStart = view.findViewById(R.id.btnStart)
         btnEnd = view.findViewById(R.id.btnEnd)
 
-        // Digit buttons
         val digitIds = intArrayOf(
             R.id.btnDigit0, R.id.btnDigit1, R.id.btnDigit2, R.id.btnDigit3,
             R.id.btnDigit4, R.id.btnDigit5, R.id.btnDigit6, R.id.btnDigit7,
@@ -68,16 +98,14 @@ class TriggerTimePickerView @JvmOverloads constructor(
     private fun appendDigit(digit: Int) {
         isSpecial = false
         specialValue = 0
-        val newSeconds = currentSeconds * 10 + digit
-        // Cap at 59999 seconds (16h 39m 59s) to prevent overflow
-        if (newSeconds <= 59999) {
-            currentSeconds = newSeconds
+        if (digits.length < 6) {
+            digits += digit.toString()
+            updateDisplay()
         }
-        updateDisplay()
     }
 
     private fun clear() {
-        currentSeconds = 0
+        digits = ""
         isSpecial = false
         specialValue = 0
         updateDisplay()
@@ -86,21 +114,23 @@ class TriggerTimePickerView @JvmOverloads constructor(
     private fun backspace() {
         isSpecial = false
         specialValue = 0
-        currentSeconds = currentSeconds / 10
+        if (digits.isNotEmpty()) {
+            digits = digits.dropLast(1)
+        }
         updateDisplay()
     }
 
     private fun setStart() {
         isSpecial = true
         specialValue = TriggerEntity.TIME_START
-        currentSeconds = 0
+        digits = ""
         updateDisplay()
     }
 
     private fun setEnd() {
         isSpecial = true
         specialValue = TriggerEntity.TIME_END
-        currentSeconds = 0
+        digits = ""
         updateDisplay()
     }
 
@@ -108,7 +138,7 @@ class TriggerTimePickerView @JvmOverloads constructor(
         txtDisplay.text = if (isSpecial) {
             TriggerEntity.formatTimeLabel(specialValue)
         } else {
-            TriggerEntity.formatTimeLabel(currentSeconds)
+            formatHMS(digitsToSeconds())
         }
     }
 }

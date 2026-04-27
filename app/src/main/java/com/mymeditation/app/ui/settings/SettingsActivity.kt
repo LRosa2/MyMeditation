@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.mymeditation.app.data.AppDatabase
 import com.mymeditation.app.databinding.ActivitySettingsBinding
@@ -38,6 +39,22 @@ class SettingsActivity : AppCompatActivity() {
             settings.timeFormat = if (checkedId == binding.radio24h.id) "24h" else "12h"
         }
 
+        // Theme mode
+        when (settings.themeMode) {
+            "light" -> binding.radioThemeLight.isChecked = true
+            "dark" -> binding.radioThemeDark.isChecked = true
+            else -> binding.radioThemeSystem.isChecked = true
+        }
+        binding.radioThemeMode.setOnCheckedChangeListener { _, checkedId ->
+            val mode = when (checkedId) {
+                binding.radioThemeLight.id -> "light"
+                binding.radioThemeDark.id -> "dark"
+                else -> "system"
+            }
+            settings.themeMode = mode
+            applyTheme(mode)
+        }
+
         binding.chkRememberVolume.setOnCheckedChangeListener { _, isChecked ->
             settings.rememberVolume = isChecked
         }
@@ -48,6 +65,14 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnExportDb.setOnClickListener { exportDatabase() }
         binding.btnImportDb.setOnClickListener { importDatabase() }
+    }
+
+    private fun applyTheme(mode: String) {
+        when (mode) {
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="meditation_primary">#FF8BC34A</color>
+    <color name="meditation_primary_dark">#FF689F38</color>
+    <color name="meditation_accent">#FF4CAF50</color>
+    <color name="meditation_bg">#FF1E2A1F</color>
+    <color name="meditation_text">#FFE0E0E0</color>
+</resources>

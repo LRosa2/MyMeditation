@@ -38,6 +38,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("time_format", "24h") ?: "24h"
         set(value) = prefs.edit().putString("time_format", value).apply()
 
+    var themeMode: String
+        get() = prefs.getString("theme_mode", "system") ?: "system"
+        set(value) = prefs.edit().putString("theme_mode", value).apply()
+
     fun is24Hour(): Boolean = timeFormat == "24h"
 
     fun formatTimeOfDay(hour: Int, minute: Int): String {
