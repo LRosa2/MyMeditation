@@ -122,7 +122,7 @@ class TimerService : Service() {
             elapsedSeconds = 0
             currentPhase = if (preparationSeconds > 0) "Preparing" else "Sitting"
 
-            sendBroadcast(Intent(ACTION_STARTED))
+            sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
 
             timerJob = serviceScope.launch(Dispatchers.IO) {
                 while (isActive) {
@@ -161,6 +161,7 @@ class TimerService : Service() {
                         putExtra(EXTRA_REMAINING, remaining.coerceAtLeast(0))
                         putExtra(EXTRA_ELAPSED, elapsedSeconds)
                         putExtra(EXTRA_PHASE, currentPhase)
+                        setPackage(packageName)
                     }
                     sendBroadcast(tickIntent)
 
@@ -227,7 +228,7 @@ class TimerService : Service() {
 
     private suspend fun endSession() {
         logSession()
-        sendBroadcast(Intent(ACTION_ENDED))
+        sendBroadcast(Intent(ACTION_ENDED).setPackage(packageName))
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -239,7 +240,7 @@ class TimerService : Service() {
             timerJob?.cancel()
             repeatingTriggerTimers.values.forEach { it.cancel() }
             repeatingTriggerTimers.clear()
-            sendBroadcast(Intent(ACTION_STOPPED))
+            sendBroadcast(Intent(ACTION_STOPPED).setPackage(packageName))
             releaseWakeLock()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()

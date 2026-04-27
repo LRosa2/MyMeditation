@@ -35,6 +35,7 @@
         <activity android:name=".ui.reminders.ReminderEditActivity" />
         <activity android:name=".ui.settings.SettingsActivity" />
         <activity android:name=".ui.stats.StatisticsActivity" />
+        <activity android:name=".ui.stats.SittingLogActivity" />
 
         <service
             android:name=".service.TimerService"

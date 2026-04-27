@@ -79,4 +79,23 @@
     <string name="no">No</string>
     <string name="channel_name">Meditation Timer</string>
     <string name="channel_description">Timer and reminder notifications</string>
+
+    <!-- Chains / Streaks -->
+    <string name="chains_title">Chains</string>
+    <string name="chains_min_minutes">Minimum minutes per day to count</string>
+    <string name="show_chains">Show Chains</string>
+    <string name="no_chains">No chains found</string>
+    <string name="chain_days">%d days</string>
+    <string name="chain_date_range">%s – %s</string>
+
+    <!-- Sitting Log -->
+    <string name="view_sitting_log">View Sitting Log</string>
+    <string name="sitting_log">Sitting Log</string>
+    <string name="no_log_entries">No log entries</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="import_csv">Import CSV</string>
+    <string name="export_csv_success">CSV exported successfully</string>
+    <string name="export_csv_fail">Export failed</string>
+    <string name="import_csv_success">CSV imported successfully</string>
+    <string name="import_csv_fail">Import failed</string>
 </resources>

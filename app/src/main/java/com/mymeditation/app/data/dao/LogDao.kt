@@ -13,6 +13,9 @@ interface LogDao {
     @Query("SELECT * FROM log_entries ORDER BY startTime DESC")
     fun getAllLogs(): Flow<List<LogEntryEntity>>
 
+    @Query("SELECT * FROM log_entries ORDER BY startTime DESC")
+    suspend fun getAllLogsList(): List<LogEntryEntity>
+
     @Query("SELECT SUM(durationSeconds) FROM log_entries WHERE startTime >= :startOfDay AND startTime < :endOfDay")
     suspend fun getTotalSecondsForDay(startOfDay: Long, endOfDay: Long): Int?
 
@@ -27,4 +30,18 @@ interface LogDao {
 
     @Query("SELECT COUNT(*) FROM log_entries WHERE startTime >= :since")
     suspend fun getSessionCountSince(since: Long): Int?
+
+    @Query("SELECT DATE(startTime / 1000, 'unixepoch') AS day, SUM(durationSeconds) AS totalSeconds FROM log_entries GROUP BY day ORDER BY day ASC")
+    suspend fun getDailyTotals(): List<DailyTotal>
+
+    @Delete
+    suspend fun deleteLog(logEntry: LogEntryEntity)
+
+    @Query("DELETE FROM log_entries WHERE id = :id")
+    suspend fun deleteLogById(id: Long)
 }
+
+data class DailyTotal(
+    val day: String,
+    val totalSeconds: Int
+)
