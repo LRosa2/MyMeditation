@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Time display with clear button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:id="@+id/txtTimeDisplay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0S"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:textColor="@color/meditation_primary"
+            android:gravity="center" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/clear"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:minWidth="64dp" />
+    </LinearLayout>
+
+    <!-- Numpad grid -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="4"
+        android:useDefaultMargins="true"
+        android:alignmentMode="alignBounds"
+        android:rowOrderPreserved="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit1"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="1"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit2"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="2"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit3"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="3"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit4"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="4"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit5"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="5"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit6"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="6"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit7"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="7"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit8"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="8"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit9"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="9"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStart"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="▶"
+            android:textSize="16sp"
+            android:contentDescription="Start of meditation"
+            app:backgroundTint="@color/meditation_accent"
+            style="@style/Widget.MaterialComponents.Button" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDigit0"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="0"
+            android:textSize="20sp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnd"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnSpan="1"
+            android:layout_columnWeight="1"
+            android:text="■"
+            android:textSize="16sp"
+            android:contentDescription="End of meditation"
+            app:backgroundTint="@color/meditation_primary"
+            style="@style/Widget.MaterialComponents.Button" />
+
+    </GridLayout>
+
+</LinearLayout>

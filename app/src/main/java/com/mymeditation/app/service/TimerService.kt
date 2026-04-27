@@ -15,6 +15,8 @@ import com.mymeditation.app.R
 import com.mymeditation.app.data.AppDatabase
 import com.mymeditation.app.data.entities.LogEntryEntity
 import com.mymeditation.app.data.entities.TriggerEntity
+import com.mymeditation.app.data.entities.TriggerEntity.Companion.TIME_END
+import com.mymeditation.app.data.entities.TriggerEntity.Companion.TIME_START
 import com.mymeditation.app.ui.main.MainActivity
 import com.mymeditation.app.util.AudioHelper
 import com.mymeditation.app.util.SettingsManager
@@ -152,6 +154,10 @@ class TimerService : Service() {
 
                     // Check triggers
                     val sittingElapsed = elapsedSeconds - preparationSeconds
+                    if (sittingElapsed == 1) {
+                        // Execute START triggers at the beginning of sitting phase
+                        executeStartTriggers()
+                    }
                     if (sittingElapsed > 0) {
                         checkTriggers(sittingElapsed)
                     }
@@ -181,6 +187,8 @@ class TimerService : Service() {
 
     private suspend fun checkTriggers(sittingElapsed: Int) {
         for (trigger in triggers) {
+            // Skip START and END triggers - they are handled separately
+            if (trigger.startTimeSeconds == TIME_START || trigger.startTimeSeconds == TIME_END) continue
             if (trigger.id in firedTriggers && !trigger.repeating) continue
             if (trigger.id in firedTriggers && trigger.repeating) continue // handled by repeating timer
 
@@ -205,9 +213,28 @@ class TimerService : Service() {
         }
     }
 
+    private fun executeStartTriggers() {
+        for (trigger in triggers) {
+            if (trigger.startTimeSeconds == TIME_START && trigger.id !in firedTriggers) {
+                firedTriggers.add(trigger.id)
+                executeTrigger(trigger)
+            }
+        }
+    }
+
+    private fun executeEndTriggers() {
+        for (trigger in triggers) {
+            if (trigger.startTimeSeconds == TIME_END && trigger.id !in firedTriggers) {
+                firedTriggers.add(trigger.id)
+                executeTrigger(trigger)
+            }
+        }
+    }
+
     private fun executeTrigger(trigger: TriggerEntity) {
         if (trigger.type == "BELL") {
             AudioHelper.playBell(
+                context = this@TimerService,
                 volume = trigger.volume,
                 useAlarmStream = useAlarm,
                 executions = trigger.executions,
@@ -227,6 +254,7 @@ class TimerService : Service() {
     }
 
     private suspend fun endSession() {
+        executeEndTriggers()
         logSession()
         sendBroadcast(Intent(ACTION_ENDED).setPackage(packageName))
         releaseWakeLock()
@@ -236,6 +264,7 @@ class TimerService : Service() {
 
     private fun stopTimer() {
         serviceScope.launch {
+            executeEndTriggers()
             logSession()
             timerJob?.cancel()
             repeatingTriggerTimers.values.forEach { it.cancel() }

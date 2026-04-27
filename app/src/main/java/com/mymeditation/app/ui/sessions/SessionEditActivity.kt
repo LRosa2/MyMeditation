@@ -13,7 +13,7 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
-import com.mymeditation.app.ui.widgets.DurationPickerView
+import com.mymeditation.app.ui.widgets.TriggerTimePickerView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -186,7 +186,7 @@ class SessionEditActivity : AppCompatActivity() {
     private fun showTriggerDialog(existing: TriggerEntity?) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_trigger_edit, null)
 
-        val pickerStartTime = dialogView.findViewById<DurationPickerView>(R.id.pickerStartTime)
+        val pickerStartTime = dialogView.findViewById<TriggerTimePickerView>(R.id.pickerStartTime)
         val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerTriggerType)
         val editMp3Path = dialogView.findViewById<EditText>(R.id.editMp3Path)
         val layoutMp3Path = dialogView.findViewById<View>(R.id.layoutMp3Path)
@@ -229,7 +229,7 @@ class SessionEditActivity : AppCompatActivity() {
 
         // Fill existing values
         if (existing != null) {
-            pickerStartTime.setDurationSeconds(existing.startTimeSeconds)
+            pickerStartTime.value = existing.startTimeSeconds
             spinnerType.setSelection(if (existing.type == "BELL") 0 else 1)
             editMp3Path.setText(existing.mp3Path ?: "")
             seekBarVolume.progress = existing.volume
@@ -247,7 +247,7 @@ class SessionEditActivity : AppCompatActivity() {
             .create()
 
         btnSave.setOnClickListener {
-            val startTime = pickerStartTime.getDurationSeconds()
+            val startTime = pickerStartTime.value
             val triggerType = if (spinnerType.selectedItemPosition == 0) "BELL" else "MP3"
             val mp3Path = if (triggerType == "MP3") editMp3Path.text.toString() else null
             val vol = seekBarVolume.progress
@@ -291,6 +291,7 @@ class SessionEditActivity : AppCompatActivity() {
 
             if (triggerType == "BELL") {
                 AudioHelper.playBell(
+                    context = this@SessionEditActivity,
                     volume = vol,
                     useAlarmStream = settings.playAsAlarm,
                     executions = executions,
@@ -344,9 +345,7 @@ class SessionEditActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val trigger = items[position]
-            val m = trigger.startTimeSeconds / 60
-            val s = trigger.startTimeSeconds % 60
-            holder.time.text = String.format("At %02d:%02d", m, s)
+            holder.time.text = "At ${TriggerEntity.formatTimeLabel(trigger.startTimeSeconds)}"
             holder.type.text = if (trigger.type == "BELL") "Bell" else "MP3: ${trigger.mp3Path}"
             val details = buildString {
                 append("Vol: ${trigger.volume}%")

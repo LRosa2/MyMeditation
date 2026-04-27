@@ -37,13 +37,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/meditation_text" />
 
                 <TextView
                     android:id="@+id/txtTodayCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/meditation_text" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -74,13 +76,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/meditation_text" />
 
                 <TextView
                     android:id="@+id/txtWeekCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/meditation_text" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -111,13 +115,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/meditation_text" />
 
                 <TextView
                     android:id="@+id/txtMonthCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/meditation_text" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -147,13 +153,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/meditation_text" />
 
                 <TextView
                     android:id="@+id/txtAllTimeCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/meditation_text" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -187,6 +195,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/chains_min_minutes"
                     android:textSize="12sp"
+                    android:textColor="@color/meditation_text"
                     android:layout_marginBottom="4dp" />
 
                 <LinearLayout
