@@ -66,7 +66,7 @@ class TriggerTimePickerView @JvmOverloads constructor(
         val h = seconds / 3600
         val m = (seconds % 3600) / 60
         val s = seconds % 60
-        return String.format("%dH%02dM%02dS", h, m, s)
+        return String.format("%dh%02dm%02ds", h, m, s)
     }
 
     init {
