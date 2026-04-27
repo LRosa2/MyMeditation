@@ -2,6 +2,8 @@ package com.mymeditation.app.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class SettingsManager(context: Context) {
 
@@ -31,4 +33,32 @@ class SettingsManager(context: Context) {
     var savedAlarmVolume: Int
         get() = prefs.getInt("saved_alarm_volume", -1)
         set(value) = prefs.edit().putInt("saved_alarm_volume", value).apply()
+
+    var timeFormat: String
+        get() = prefs.getString("time_format", "24h") ?: "24h"
+        set(value) = prefs.edit().putString("time_format", value).apply()
+
+    fun is24Hour(): Boolean = timeFormat == "24h"
+
+    fun formatTimeOfDay(hour: Int, minute: Int): String {
+        return if (is24Hour()) {
+            String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+        } else {
+            val amPm = if (hour >= 12) "PM" else "AM"
+            val hour12 = when {
+                hour == 0 -> 12
+                hour > 12 -> hour - 12
+                else -> hour
+            }
+            String.format(Locale.getDefault(), "%02d:%02d %s", hour12, minute, amPm)
+        }
+    }
+
+    fun getDateTimeFormatPattern(): String {
+        return if (is24Hour()) "dd.MM.yyyy HH:mm" else "dd.MM.yyyy hh:mm a"
+    }
+
+    fun getDateTimeFormat(): SimpleDateFormat {
+        return SimpleDateFormat(getDateTimeFormatPattern(), Locale.getDefault())
+    }
 }

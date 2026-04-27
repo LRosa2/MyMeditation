@@ -18,6 +18,7 @@ import com.mymeditation.app.R
 import com.mymeditation.app.data.AppDatabase
 import com.mymeditation.app.data.entities.LogEntryEntity
 import com.mymeditation.app.databinding.ActivitySittingLogBinding
+import com.mymeditation.app.util.SettingsManager
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -29,6 +30,7 @@ class SittingLogActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySittingLogBinding
     private lateinit var db: AppDatabase
+    private lateinit var settings: SettingsManager
     private lateinit var adapter: LogAdapter
 
     private val exportLauncher = registerForActivityResult(
@@ -47,6 +49,7 @@ class SittingLogActivity : AppCompatActivity() {
         title = getString(R.string.sitting_log)
 
         db = AppDatabase.getInstance(this)
+        settings = SettingsManager(this)
 
         adapter = LogAdapter(
             onDeleteClick = { entry -> confirmDelete(entry) }
@@ -188,7 +191,7 @@ class SittingLogActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val entry = items[position]
             holder.session.text = entry.sessionName
-            val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US)
+            val dateFormat = settings.getDateTimeFormat()
             holder.date.text = dateFormat.format(Date(entry.startTime))
             holder.duration.text = formatDuration(entry.durationSeconds)
             holder.btnDelete.setOnClickListener { onDeleteClick(entry) }

@@ -28,6 +28,16 @@ class SettingsActivity : AppCompatActivity() {
         binding.chkRememberVolume.isChecked = settings.rememberVolume
         binding.chkPlayAsAlarm.isChecked = settings.playAsAlarm
 
+        // Time format
+        if (settings.is24Hour()) {
+            binding.radio24h.isChecked = true
+        } else {
+            binding.radio12h.isChecked = true
+        }
+        binding.radioTimeFormat.setOnCheckedChangeListener { _, checkedId ->
+            settings.timeFormat = if (checkedId == binding.radio24h.id) "24h" else "12h"
+        }
+
         binding.chkRememberVolume.setOnCheckedChangeListener { _, isChecked ->
             settings.rememberVolume = isChecked
         }

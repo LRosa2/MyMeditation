@@ -2,13 +2,20 @@ package com.mymeditation.app.util
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioTrack
 import android.media.MediaPlayer
-import android.media.ToneGenerator
-import android.os.Build
 import java.io.File
+import kotlin.math.PI
+import kotlin.math.exp
+import kotlin.math.sin
 
 object AudioHelper {
+
+    private const val BELL_FREQUENCY = 432.0 // Hz - "Verdi Tuning"
+    private const val BELL_DURATION_MS = 5000L // 5 seconds
+    private const val SAMPLE_RATE = 44100
 
     fun playBell(
         volume: Int, // 0-100
@@ -18,15 +25,10 @@ object AudioHelper {
         onComplete: (() -> Unit)? = null
     ) {
         Thread {
-            val streamType = if (useAlarmStream) AudioManager.STREAM_ALARM else AudioManager.STREAM_MUSIC
             var remaining = executions
             while (remaining > 0) {
                 try {
-                    val toneGen = ToneGenerator(streamType, volume)
-                    toneGen.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 800)
-                    Thread.sleep(800L + gapMs)
-                    toneGen.stopTone()
-                    toneGen.release()
+                    play432HzBell(volume, useAlarmStream)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -37,6 +39,57 @@ object AudioHelper {
             }
             onComplete?.invoke()
         }.start()
+    }
+
+    private fun play432HzBell(volume: Int, useAlarmStream: Boolean) {
+        val numSamples = (SAMPLE_RATE * BELL_DURATION_MS / 1000.0).toInt()
+        val samples = ShortArray(numSamples)
+        val amplitude = (volume / 100.0) * Short.MAX_VALUE
+
+        // Generate 432Hz sine wave with exponential fade-out
+        for (i in 0 until numSamples) {
+            val t = i.toDouble() / SAMPLE_RATE
+            // Exponential decay: gain goes from 1.0 to ~0.001 over BELL_DURATION_MS
+            val progress = i.toDouble() / numSamples
+            val gain = exp(-6.9 * progress) // e^(-6.9) ≈ 0.001
+            val sample = amplitude * gain * sin(2.0 * PI * BELL_FREQUENCY * t)
+            samples[i] = (sample.toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())).toShort()
+        }
+
+        val bufferSize = numSamples * 2 // 16-bit = 2 bytes per sample
+
+        val audioAttributes = if (useAlarmStream) {
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+        } else {
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+        }
+
+        val audioFormat = AudioFormat.Builder()
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .setSampleRate(SAMPLE_RATE)
+            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+            .build()
+
+        val track = AudioTrack.Builder()
+            .setAudioAttributes(audioAttributes)
+            .setAudioFormat(audioFormat)
+            .setBufferSizeInBytes(bufferSize)
+            .setTransferMode(AudioTrack.MODE_STATIC)
+            .build()
+
+        track.write(samples, 0, numSamples)
+        track.play()
+
+        // Wait for playback to finish
+        Thread.sleep(BELL_DURATION_MS + 100)
+        track.stop()
+        track.release()
     }
 
     fun playMp3(
@@ -72,6 +125,10 @@ object AudioHelper {
                     val file = File(path)
                     if (file.exists()) {
                         mp.setDataSource(path)
+                    } else if (path.startsWith("content://")) {
+                        // Content URI from SAF file picker
+                        val uri = android.net.Uri.parse(path)
+                        mp.setDataSource(context, uri)
                     } else {
                         // Try as asset or resource URI
                         mp.setDataSource(path)

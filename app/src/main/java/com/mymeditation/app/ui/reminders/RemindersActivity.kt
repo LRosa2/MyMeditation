@@ -23,12 +23,14 @@ import com.mymeditation.app.data.AppDatabase
 import com.mymeditation.app.data.entities.ReminderEntity
 import com.mymeditation.app.databinding.ActivityRemindersBinding
 import com.mymeditation.app.receiver.ReminderReceiver
+import com.mymeditation.app.util.SettingsManager
 import kotlinx.coroutines.launch
 
 class RemindersActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRemindersBinding
     private lateinit var db: AppDatabase
+    private lateinit var settings: SettingsManager
     private lateinit var adapter: ReminderAdapter
 
     private val notificationPermissionLauncher = registerForActivityResult(
@@ -47,6 +49,7 @@ class RemindersActivity : AppCompatActivity() {
         title = getString(R.string.menu_reminders)
 
         db = AppDatabase.getInstance(this)
+        settings = SettingsManager(this)
         adapter = ReminderAdapter(
             onEnabledChanged = { reminder, enabled -> updateReminder(reminder, enabled) },
             onDeleteClick = { reminder -> confirmDelete(reminder) }
@@ -95,12 +98,60 @@ class RemindersActivity : AppCompatActivity() {
         lifecycleScope.launch {
             db.reminderDao().updateReminder(reminder.copy(enabled = enabled))
             if (enabled) {
+                // Check alarm permission before scheduling
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                    if (!alarmManager.canScheduleExactAlarms()) {
+                        requestAlarmPermission()
+                    }
+                }
                 ReminderReceiver.schedule(this@RemindersActivity, reminder)
             } else {
                 ReminderReceiver.cancel(this@RemindersActivity, reminder)
             }
             loadReminders()
         }
+    }
+
+    private fun requestAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                AlertDialog.Builder(this)
+                    .setTitle("Alarm Permission")
+                    .setMessage("For reliable reminders, please grant exact alarm permission in the next screen.")
+                    .setPositiveButton("OK") { _, _ ->
+                        try {
+                            val intent = Intent(
+                                android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                android.net.Uri.parse("package:$packageName")
+                            )
+                            // Check if the intent can be resolved
+                            if (intent.resolveActivity(packageManager) != null) {
+                                startActivity(intent)
+                            } else {
+                                // Fallback to app alarm settings
+                                openAppAlarmSettings()
+                            }
+                        } catch (e: Exception) {
+                            openAppAlarmSettings()
+                        }
+                    }
+                    .setNegativeButton("Later", null)
+                    .show()
+            }
+        }
+    }
+
+    private fun openAppAlarmSettings() {
+        try {
+            // Try the alarms settings for this app (API 31+)
+            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.parse("package:$packageName")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        } catch (_: Exception) {}
     }
 
     private fun confirmDelete(reminder: ReminderEntity) {
@@ -139,7 +190,7 @@ class RemindersActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val reminder = items[position]
-            holder.time.text = String.format("%02d:%02d", reminder.timeHour, reminder.timeMinute)
+            holder.time.text = settings.formatTimeOfDay(reminder.timeHour, reminder.timeMinute)
             holder.message.text = reminder.message
             holder.threshold.text = "Threshold: ${reminder.thresholdMinutes} min"
 

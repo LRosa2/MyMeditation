@@ -1,6 +1,8 @@
 package com.mymeditation.app.ui.sessions
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +14,7 @@ import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import com.mymeditation.app.ui.widgets.DurationPickerView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,6 +40,23 @@ class SessionEditActivity : AppCompatActivity() {
     private var sessionId: Long = 0L // 0 means new
     private var triggers = mutableListOf<TriggerEntity>()
     private lateinit var triggerAdapter: TriggerAdapter
+    private var currentMp3EditField: EditText? = null
+
+    private val mp3PickerLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            // Try to get a file path, or use the content URI directly
+            val path = try {
+                // Try to get persistent URI permission
+                contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                it.toString()
+            } catch (_: Exception) {
+                it.toString()
+            }
+            currentMp3EditField?.setText(path)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,6 +218,13 @@ class SessionEditActivity : AppCompatActivity() {
 
         chkRepeating.setOnCheckedChangeListener { _, isChecked ->
             layoutRepeatInterval.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        // Browse button for MP3 file
+        val btnBrowseMp3 = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBrowseMp3)
+        btnBrowseMp3.setOnClickListener {
+            currentMp3EditField = editMp3Path
+            mp3PickerLauncher.launch(arrayOf("audio/*"))
         }
 
         // Fill existing values

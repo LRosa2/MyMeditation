@@ -158,37 +158,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-            if (!alarmManager.canScheduleExactAlarms()) {
-                AlertDialog.Builder(this)
-                    .setTitle("Alarm Permission")
-                    .setMessage("This app needs permission to schedule exact alarms for reliable timer operation. Please grant this permission in the next screen.")
-                    .setPositiveButton("OK") { _, _ ->
-                        try {
-                            val intent = Intent(
-                                android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                                android.net.Uri.parse("package:$packageName")
-                            )
-                            startActivity(intent)
-                        } catch (e: Exception) {
-                            // Fallback to app settings page
-                            try {
-                                val fallbackIntent = Intent(
-                                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                    android.net.Uri.parse("package:$packageName")
-                                )
-                                startActivity(fallbackIntent)
-                            } catch (_: Exception) {}
-                        }
-                    }
-                    .setNegativeButton("Later", null)
-                    .show()
-            }
-        }
-    }
-
     private fun setupVolumeSlider() {
         binding.seekBarVolume.progress = settings.lastVolume
         binding.seekBarVolume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -211,14 +180,6 @@ class MainActivity : AppCompatActivity() {
         binding.btnStart.setOnClickListener {
             val session = selectedSession ?: return@setOnClickListener
 
-            // Check alarm permission before starting
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-                if (!alarmManager.canScheduleExactAlarms()) {
-                    requestAlarmPermission()
-                    return@setOnClickListener
-                }
-            }
             val volume = binding.seekBarVolume.progress
             val useAlarm = settings.playAsAlarm
 

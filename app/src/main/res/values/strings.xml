@@ -98,4 +98,10 @@
     <string name="export_csv_fail">Export failed</string>
     <string name="import_csv_success">CSV imported successfully</string>
     <string name="import_csv_fail">Import failed</string>
+
+    <!-- Time Format -->
+    <string name="time_format">Time Format</string>
+    <string name="time_format_24h">24-hour</string>
+    <string name="time_format_12h">12-hour (AM/PM)</string>
+    <string name="browse">Browse</string>
 </resources>

@@ -7,6 +7,7 @@ import com.mymeditation.app.data.AppDatabase
 import com.mymeditation.app.data.entities.ReminderEntity
 import com.mymeditation.app.databinding.ActivityReminderEditBinding
 import com.mymeditation.app.receiver.ReminderReceiver
+import com.mymeditation.app.util.SettingsManager
 import kotlinx.coroutines.launch
 
 class ReminderEditActivity : AppCompatActivity() {
@@ -23,6 +24,9 @@ class ReminderEditActivity : AppCompatActivity() {
 
         db = AppDatabase.getInstance(this)
         reminderId = intent.getLongExtra("reminder_id", 0L)
+
+        val settings = SettingsManager(this)
+        binding.timePickerReminder.setIs24HourView(settings.is24Hour())
 
         binding.btnSaveReminder.setOnClickListener { saveReminder() }
         binding.btnCancelReminder.setOnClickListener { finish() }
