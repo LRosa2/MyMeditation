@@ -32,6 +32,7 @@ class DurationPickerView @JvmOverloads constructor(
             isFocusableInTouchMode = false
             isCursorVisible = false
             inputType = android.text.InputType.TYPE_NULL
+            setPadding(paddingLeft, paddingTop + 24, paddingRight, paddingBottom)
         }
         addView(editDuration)
         editDuration.setOnClickListener { showKeypadDialog() }
