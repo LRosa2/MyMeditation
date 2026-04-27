@@ -10,19 +10,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <com.mymeditation.app.ui.widgets.DurationPickerView
+            android:id="@+id/pickerStartTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/trigger_start_time"
-            android:layout_marginBottom="8dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editStartTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="0" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginBottom="8dp"
+            app:durationMode="seconds" />
 
         <TextView
             android:layout_width="wrap_content"

@@ -36,48 +36,13 @@
             android:layout_height="48dp"
             android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/preparation_time"
-            android:textSize="14sp"
-            android:layout_marginBottom="4dp" />
-
-        <LinearLayout
+        <com.mymeditation.app.ui.widgets.DurationPickerView
+            android:id="@+id/pickerPreparation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Minutes"
-                android:layout_marginEnd="8dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editPrepMinutes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="0" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Seconds">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editPrepSeconds"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="0" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+            android:hint="@string/preparation_time"
+            android:layout_marginBottom="8dp"
+            app:durationMode="duration" />
 
         <TextView
             android:id="@+id/labelSittingTime"
@@ -87,42 +52,13 @@
             android:textSize="14sp"
             android:layout_marginBottom="4dp" />
 
-        <LinearLayout
-            android:id="@+id/layoutSittingTime"
+        <com.mymeditation.app.ui.widgets.DurationPickerView
+            android:id="@+id/pickerSitting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Minutes"
-                android:layout_marginEnd="8dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editSittingMinutes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="0" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Seconds">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editSittingSeconds"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:text="0" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+            android:hint="@string/sitting_time"
+            android:layout_marginBottom="16dp"
+            app:durationMode="duration" />
 
         <CheckBox
             android:id="@+id/chkDefault"

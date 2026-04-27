@@ -25,6 +25,7 @@
     <string name="set_as_default">Set as default</string>
     <string name="triggers">Triggers</string>
     <string name="add_trigger">Add Trigger</string>
+    <string name="add_session">Add Session</string>
     <string name="delete_session">Delete session?</string>
     <string name="no_sessions">No sessions configured</string>
 

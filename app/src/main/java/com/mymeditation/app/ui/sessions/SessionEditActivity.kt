@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
+import com.mymeditation.app.ui.widgets.DurationPickerView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,7 +61,7 @@ class SessionEditActivity : AppCompatActivity() {
         binding.spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 val isClosed = pos == 0
-                binding.layoutSittingTime.visibility = if (isClosed) View.VISIBLE else View.GONE
+                binding.pickerSitting.visibility = if (isClosed) View.VISIBLE else View.GONE
                 binding.labelSittingTime.visibility = if (isClosed) View.VISIBLE else View.GONE
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
@@ -94,10 +95,8 @@ class SessionEditActivity : AppCompatActivity() {
             val session = db.sessionDao().getSessionById(sessionId) ?: return@launch
             binding.editSessionName.setText(session.name)
             binding.spinnerType.setSelection(if (session.type == "CLOSED") 0 else 1)
-            binding.editPrepMinutes.setText(session.preparationMinutes.toString())
-            binding.editPrepSeconds.setText(session.preparationSeconds.toString())
-            binding.editSittingMinutes.setText(session.sittingMinutes.toString())
-            binding.editSittingSeconds.setText(session.sittingSeconds.toString())
+            binding.pickerPreparation.setDurationSeconds(session.preparationMinutes * 60 + session.preparationSeconds)
+            binding.pickerSitting.setDurationSeconds(session.sittingMinutes * 60 + session.sittingSeconds)
             binding.chkDefault.isChecked = session.isDefault
 
             triggers.clear()
@@ -114,10 +113,12 @@ class SessionEditActivity : AppCompatActivity() {
         }
 
         val type = if (binding.spinnerType.selectedItemPosition == 0) "CLOSED" else "OPEN"
-        val prepMin = binding.editPrepMinutes.text.toString().toIntOrNull() ?: 0
-        val prepSec = binding.editPrepSeconds.text.toString().toIntOrNull() ?: 0
-        val sitMin = binding.editSittingMinutes.text.toString().toIntOrNull() ?: 0
-        val sitSec = binding.editSittingSeconds.text.toString().toIntOrNull() ?: 0
+        val prepTotal = binding.pickerPreparation.getDurationSeconds()
+        val prepMin = prepTotal / 60
+        val prepSec = prepTotal % 60
+        val sitTotal = binding.pickerSitting.getDurationSeconds()
+        val sitMin = sitTotal / 60
+        val sitSec = sitTotal % 60
         val isDefault = binding.chkDefault.isChecked
 
         lifecycleScope.launch {
@@ -165,7 +166,7 @@ class SessionEditActivity : AppCompatActivity() {
     private fun showTriggerDialog(existing: TriggerEntity?) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_trigger_edit, null)
 
-        val editStartTime = dialogView.findViewById<EditText>(R.id.editStartTime)
+        val pickerStartTime = dialogView.findViewById<DurationPickerView>(R.id.pickerStartTime)
         val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerTriggerType)
         val editMp3Path = dialogView.findViewById<EditText>(R.id.editMp3Path)
         val layoutMp3Path = dialogView.findViewById<View>(R.id.layoutMp3Path)
@@ -201,7 +202,7 @@ class SessionEditActivity : AppCompatActivity() {
 
         // Fill existing values
         if (existing != null) {
-            editStartTime.setText(existing.startTimeSeconds.toString())
+            pickerStartTime.setDurationSeconds(existing.startTimeSeconds)
             spinnerType.setSelection(if (existing.type == "BELL") 0 else 1)
             editMp3Path.setText(existing.mp3Path ?: "")
             seekBarVolume.progress = existing.volume
@@ -219,7 +220,7 @@ class SessionEditActivity : AppCompatActivity() {
             .create()
 
         btnSave.setOnClickListener {
-            val startTime = editStartTime.text.toString().toIntOrNull() ?: 0
+            val startTime = pickerStartTime.getDurationSeconds()
             val triggerType = if (spinnerType.selectedItemPosition == 0) "BELL" else "MP3"
             val mp3Path = if (triggerType == "MP3") editMp3Path.text.toString() else null
             val vol = seekBarVolume.progress
