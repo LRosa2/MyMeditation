@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mymeditation.app"
+    namespace = "com.mysimplemeditation.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mymeditation.app"
+        applicationId = "com.mysimplemeditation.app"
         minSdk = 31
         targetSdk = 34
         versionCode = 1

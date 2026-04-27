@@ -263,6 +263,17 @@
                     android:layout_marginTop="8dp"
                     android:nestedScrollingEnabled="false" />
 
+                <TextView
+                    android:id="@+id/txtEmptyChains"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_chains"
+                    android:textSize="14sp"
+                    android:textColor="@color/meditation_text"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:visibility="gone" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

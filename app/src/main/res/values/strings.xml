@@ -84,7 +84,6 @@
     <string name="chains_title">Chains</string>
     <string name="chains_min_minutes">Minimum minutes per day to count</string>
     <string name="show_chains">Show Chains</string>
-    <string name="no_chains">No chains found</string>
     <string name="chain_days">%d days</string>
     <string name="chain_date_range">%s – %s</string>
 
@@ -107,6 +106,9 @@
     <string name="clear">Clear</string>
     <string name="trigger_start_label">Start</string>
     <string name="trigger_end_label">End</string>
+
+    <!-- Chains -->
+    <string name="no_chains">No qualifying days found. Complete sittings to build chains!</string>
 
     <!-- Theme -->
     <string name="theme_mode">Theme</string>
