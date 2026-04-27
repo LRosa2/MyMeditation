@@ -52,6 +52,7 @@ class RemindersActivity : AppCompatActivity() {
         settings = SettingsManager(this)
         adapter = ReminderAdapter(
             onEnabledChanged = { reminder, enabled -> updateReminder(reminder, enabled) },
+            onEditClick = { reminder -> editReminder(reminder) },
             onDeleteClick = { reminder -> confirmDelete(reminder) }
         )
 
@@ -154,6 +155,13 @@ class RemindersActivity : AppCompatActivity() {
         } catch (_: Exception) {}
     }
 
+    private fun editReminder(reminder: ReminderEntity) {
+        val intent = Intent(this, ReminderEditActivity::class.java).apply {
+            putExtra("reminder_id", reminder.id)
+        }
+        startActivity(intent)
+    }
+
     private fun confirmDelete(reminder: ReminderEntity) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.confirm_delete))
@@ -170,6 +178,7 @@ class RemindersActivity : AppCompatActivity() {
 
     inner class ReminderAdapter(
         private val onEnabledChanged: (ReminderEntity, Boolean) -> Unit,
+        private val onEditClick: (ReminderEntity) -> Unit,
         private val onDeleteClick: (ReminderEntity) -> Unit
     ) : RecyclerView.Adapter<ReminderAdapter.ViewHolder>() {
 
@@ -201,6 +210,7 @@ class RemindersActivity : AppCompatActivity() {
             }
 
             holder.btnDelete.setOnClickListener { onDeleteClick(reminder) }
+            holder.layoutInfo.setOnClickListener { onEditClick(reminder) }
         }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -209,6 +219,7 @@ class RemindersActivity : AppCompatActivity() {
             val threshold: TextView = view.findViewById(R.id.txtReminderThreshold)
             val chkEnabled: CheckBox = view.findViewById(R.id.chkReminderEnabled)
             val btnDelete: View = view.findViewById(R.id.btnDeleteReminder)
+            val layoutInfo: View = view.findViewById(R.id.layoutReminderInfo)
         }
     }
 }
