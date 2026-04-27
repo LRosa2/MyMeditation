@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.MyMeditation" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.MyMeditation" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/meditation_primary</item>
         <item name="colorPrimaryDark">@color/meditation_primary_dark</item>
         <item name="colorAccent">@color/meditation_accent</item>
         <item name="android:windowBackground">@color/meditation_bg</item>
+        <item name="android:textColorPrimary">@color/meditation_text</item>
+        <item name="android:textColorSecondary">@color/meditation_text</item>
+        <item name="android:textColorHint">@color/meditation_text</item>
+        <item name="alertDialogTheme">@style/Theme.MyMeditation.AlertDialog</item>
+    </style>
+
+    <style name="Theme.MyMeditation.AlertDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/meditation_primary</item>
+        <item name="colorAccent">@color/meditation_accent</item>
+        <item name="android:background">@color/meditation_bg</item>
+        <item name="android:textColorPrimary">@color/meditation_text</item>
+        <item name="android:textColorSecondary">@color/meditation_text</item>
     </style>
 </resources>

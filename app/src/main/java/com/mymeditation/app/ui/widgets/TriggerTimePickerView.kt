@@ -60,6 +60,7 @@ class TriggerTimePickerView @JvmOverloads constructor(
         btnClear.setOnClickListener { clear() }
         btnStart.setOnClickListener { setStart() }
         btnEnd.setOnClickListener { setEnd() }
+        view.findViewById<MaterialButton>(R.id.btnBackspace).setOnClickListener { backspace() }
 
         updateDisplay()
     }
@@ -79,6 +80,13 @@ class TriggerTimePickerView @JvmOverloads constructor(
         currentSeconds = 0
         isSpecial = false
         specialValue = 0
+        updateDisplay()
+    }
+
+    private fun backspace() {
+        isSpecial = false
+        specialValue = 0
+        currentSeconds = currentSeconds / 10
         updateDisplay()
     }
 

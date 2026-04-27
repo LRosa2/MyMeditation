@@ -82,7 +82,6 @@ class SessionEditActivity : AppCompatActivity() {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 val isClosed = pos == 0
                 binding.pickerSitting.visibility = if (isClosed) View.VISIBLE else View.GONE
-                binding.labelSittingTime.visibility = if (isClosed) View.VISIBLE else View.GONE
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }

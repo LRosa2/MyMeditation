@@ -42,25 +42,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/preparation_time"
-            android:layout_marginBottom="8dp"
-            app:durationMode="duration" />
-
-        <TextView
-            android:id="@+id/labelSittingTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sitting_time"
-            android:textSize="14sp"
-            android:textColor="@color/meditation_text"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="8dp" />
 
         <com.mymeditation.app.ui.widgets.DurationPickerView
             android:id="@+id/pickerSitting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/sitting_time"
-            android:layout_marginBottom="16dp"
-            app:durationMode="duration" />
+            android:layout_marginBottom="16dp" />
 
         <CheckBox
             android:id="@+id/chkDefault"
