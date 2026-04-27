@@ -190,17 +190,14 @@ class SittingLogActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val entry = items[position]
-            holder.session.text = entry.sessionName
             val dateFormat = settings.getDateTimeFormat()
-            holder.date.text = dateFormat.format(Date(entry.startTime))
-            holder.duration.text = formatDuration(entry.durationSeconds)
+            val dateStr = dateFormat.format(Date(entry.startTime))
+            holder.date.text = "$dateStr  ${formatDuration(entry.durationSeconds)}"
             holder.btnDelete.setOnClickListener { onDeleteClick(entry) }
         }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val session: TextView = view.findViewById(R.id.txtLogSession)
             val date: TextView = view.findViewById(R.id.txtLogDate)
-            val duration: TextView = view.findViewById(R.id.txtLogDuration)
             val btnDelete: View = view.findViewById(R.id.btnDeleteLog)
         }
     }

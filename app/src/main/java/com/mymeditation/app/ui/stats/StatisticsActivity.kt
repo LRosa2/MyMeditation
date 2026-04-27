@@ -115,7 +115,7 @@ class StatisticsActivity : AppCompatActivity() {
     }
 
     private fun loadChains() {
-        val min1 = binding.editChainMin1.text.toString().toIntOrNull() ?: 15
+        val min1 = binding.editChainMin1.text.toString().toIntOrNull() ?: 1
         val min2 = binding.editChainMin2.text.toString().toIntOrNull() ?: 30
         val min3 = binding.editChainMin3.text.toString().toIntOrNull() ?: 45
 

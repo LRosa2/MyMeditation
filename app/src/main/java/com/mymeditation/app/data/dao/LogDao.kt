@@ -31,7 +31,7 @@ interface LogDao {
     @Query("SELECT COUNT(*) FROM log_entries WHERE startTime >= :since")
     suspend fun getSessionCountSince(since: Long): Int?
 
-    @Query("SELECT DATE(startTime / 1000, 'unixepoch') AS day, SUM(durationSeconds) AS totalSeconds FROM log_entries GROUP BY day ORDER BY day ASC")
+    @Query("SELECT DATE(startTime / 1000, 'unixepoch', 'localtime') AS day, SUM(durationSeconds) AS totalSeconds FROM log_entries GROUP BY day ORDER BY day ASC")
     suspend fun getDailyTotals(): List<DailyTotal>
 
     @Delete
