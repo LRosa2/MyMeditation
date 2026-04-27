@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.mysimplemeditation.app.R
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.data.entities.ReminderEntity
 import com.mysimplemeditation.app.databinding.ActivityReminderEditBinding
