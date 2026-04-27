@@ -55,6 +55,14 @@
         android:textColor="@color/meditation_text"
         android:layout_marginBottom="16dp" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTestNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Notification"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginBottom="16dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

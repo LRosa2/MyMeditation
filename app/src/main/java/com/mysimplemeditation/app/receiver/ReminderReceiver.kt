@@ -88,6 +88,22 @@ class ReminderReceiver : BroadcastReceiver() {
             // We'll reschedule in onReceive after the alarm fires
         }
 
+        fun testNotification(context: Context, message: String) {
+            val receiver = ReminderReceiver()
+            receiver.createNotificationChannel(context)
+
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(context.getString(R.string.reminder_notification_title))
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .build()
+
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(Int.MAX_VALUE, notification)
+        }
+
         fun cancel(context: Context, reminder: ReminderEntity) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, ReminderReceiver::class.java)

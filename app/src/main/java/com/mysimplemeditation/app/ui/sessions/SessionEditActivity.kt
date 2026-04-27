@@ -13,6 +13,7 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
+import com.mysimplemeditation.app.ui.widgets.DurationPickerView
 import com.mysimplemeditation.app.ui.widgets.TriggerTimePickerView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity

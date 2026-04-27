@@ -1,7 +1,12 @@
 package com.mysimplemeditation.app.ui.reminders
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.data.entities.ReminderEntity
@@ -15,6 +20,14 @@ class ReminderEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReminderEditBinding
     private lateinit var db: AppDatabase
     private var reminderId: Long = 0L
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            doTestNotification()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +43,7 @@ class ReminderEditActivity : AppCompatActivity() {
 
         binding.btnSaveReminder.setOnClickListener { saveReminder() }
         binding.btnCancelReminder.setOnClickListener { finish() }
+        binding.btnTestNotification.setOnClickListener { testNotification() }
 
         if (reminderId > 0) loadReminder()
     }
@@ -37,6 +51,23 @@ class ReminderEditActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    private fun testNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+        doTestNotification()
+    }
+
+    private fun doTestNotification() {
+        val message = binding.editReminderMessage.text.toString().trim()
+            .ifEmpty { getString(R.string.reminder_message) }
+        ReminderReceiver.testNotification(this, message)
     }
 
     private fun loadReminder() {

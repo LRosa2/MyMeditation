@@ -4,17 +4,20 @@ import android.app.AlertDialog
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.mysimplemeditation.app.R
 
 class DurationPickerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = com.google.android.material.R.attr.textInputFilledStyle
-) : com.google.android.material.textfield.TextInputLayout(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr) {
 
+    private val textInputLayout: TextInputLayout
     private val editDuration: TextInputEditText
     private var currentSeconds: Int = 0
 
@@ -26,15 +29,32 @@ class DurationPickerView @JvmOverloads constructor(
     }
 
     init {
+        orientation = VERTICAL
+
+        // Read hint from attrs
+        val hintText = attrs?.let {
+            val ta = context.obtainStyledAttributes(it, intArrayOf(android.R.attr.hint))
+            val hint = ta.getString(0)
+            ta.recycle()
+            hint
+        } ?: ""
+
+        // Create TextInputLayout with TextInputEditText
+        textInputLayout = TextInputLayout(context, attrs, defStyleAttr).apply {
+            if (hintText.isNotEmpty()) this.hint = hintText
+        }
+
         editDuration = TextInputEditText(context).apply {
-            id = R.id.editDuration
             isFocusable = false
             isFocusableInTouchMode = false
             isCursorVisible = false
             inputType = android.text.InputType.TYPE_NULL
             setPadding(paddingLeft, paddingTop + 24, paddingRight, paddingBottom)
         }
-        addView(editDuration)
+
+        textInputLayout.addView(editDuration)
+        addView(textInputLayout, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+
         editDuration.setOnClickListener { showKeypadDialog() }
         updateDisplay()
     }
@@ -55,7 +75,6 @@ class DurationPickerView @JvmOverloads constructor(
         val txtDisplay = dialogView.findViewById<TextView>(R.id.txtDurationDisplay)
         val btnClear = dialogView.findViewById<MaterialButton>(R.id.btnClearDuration)
 
-        // Store digits as a string, rightmost 2 = seconds, next 2 = minutes, rest = hours
         var digits = ""
 
         fun digitsToSeconds(): Int {
@@ -97,7 +116,6 @@ class DurationPickerView @JvmOverloads constructor(
             updateTempDisplay()
         }
 
-        // Initialize digits from currentSeconds
         val h = currentSeconds / 3600
         val m = (currentSeconds % 3600) / 60
         val s = currentSeconds % 60

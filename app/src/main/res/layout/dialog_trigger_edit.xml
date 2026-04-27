@@ -10,7 +10,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <com.mymeditation.app.ui.widgets.TriggerTimePickerView
+        <com.mysimplemeditation.app.ui.widgets.TriggerTimePickerView
             android:id="@+id/pickerStartTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

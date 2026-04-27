@@ -32,7 +32,7 @@
         android:layout_height="48dp"
         android:layout_marginBottom="8dp" />
 
-    <com.mymeditation.app.ui.widgets.DurationPickerView
+    <com.mysimplemeditation.app.ui.widgets.DurationPickerView
         android:id="@+id/pickerPreparation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp" />
 
-    <com.mymeditation.app.ui.widgets.DurationPickerView
+    <com.mysimplemeditation.app.ui.widgets.DurationPickerView
         android:id="@+id/pickerSitting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
