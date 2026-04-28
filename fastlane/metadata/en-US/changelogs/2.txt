@@ -1,0 +1,5 @@
+Version 1.1.1:
+- Added Fastlane metadata with app icon and screenshots structure
+- Fixed Gradle wrapper security by adding SHA-256 checksum verification
+- Removed foojay-resolver plugin for F-Droid compatibility
+
