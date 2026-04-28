@@ -62,11 +62,6 @@ class SittingLogActivity : AppCompatActivity() {
         binding.recyclerLog.layoutManager = LinearLayoutManager(this)
         binding.recyclerLog.adapter = adapter
 
-        binding.btnExportCsv.setOnClickListener { exportLauncher.launch("meditation_log.csv") }
-        binding.btnImportCsv.setOnClickListener {
-            importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain"))
-        }
-        binding.btnClearLog.setOnClickListener { confirmClearAll() }
         binding.btnAddEntry.setOnClickListener { showAddEntryDialog() }
 
         loadLog()
@@ -80,6 +75,33 @@ class SittingLogActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_sitting_log, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_add -> {
+                showAddEntryDialog()
+                true
+            }
+            R.id.action_export -> {
+                exportLauncher.launch("meditation_log.csv")
+                true
+            }
+            R.id.action_import -> {
+                importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain"))
+                true
+            }
+            R.id.action_clear -> {
+                confirmClearAll()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun loadLog() {
