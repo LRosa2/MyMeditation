@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity() {
         binding.spinnerTriggerMode.setSelection(selection)
 
         binding.spinnerTriggerMode.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, pos: Int, id: Long) {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, pos: Int, id: Long) {
                 settings.globalTriggerMode = when (pos) {
                     1 -> "vibration_only"
                     2 -> "sound_only"

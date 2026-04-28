@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sound Type"
+            android:textSize="14sp"
+            android:textColor="@color/meditation_text"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spinnerGeneralSoundType"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutGeneralMp3Path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="MP3 Path">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editGeneralMp3Path"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGeneralBrowseMp3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Browse"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Volume"
+            android:textSize="14sp"
+            android:textColor="@color/meditation_text" />
+
+        <SeekBar
+            android:id="@+id/seekBarGeneralVolume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Executions"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editGeneralSoundExecutions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Gap (ms)"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editGeneralSoundGap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="500" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTestGeneralSound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Sound"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+</ScrollView>

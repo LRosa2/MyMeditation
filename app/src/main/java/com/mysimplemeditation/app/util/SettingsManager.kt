@@ -62,6 +62,26 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("global_trigger_mode", "default") ?: "default"
         set(value) = prefs.edit().putString("global_trigger_mode", value).apply()
 
+    var generalSoundType: String
+        get() = prefs.getString("general_sound_type", "BELL") ?: "BELL"
+        set(value) = prefs.edit().putString("general_sound_type", value).apply()
+
+    var generalSoundVolume: Int
+        get() = prefs.getInt("general_sound_volume", 80)
+        set(value) = prefs.edit().putInt("general_sound_volume", value).apply()
+
+    var generalSoundExecutions: Int
+        get() = prefs.getInt("general_sound_executions", 1)
+        set(value) = prefs.edit().putInt("general_sound_executions", value).apply()
+
+    var generalSoundGapMs: Int
+        get() = prefs.getInt("general_sound_gap_ms", 500)
+        set(value) = prefs.edit().putInt("general_sound_gap_ms", value).apply()
+
+    var generalSoundMp3Path: String
+        get() = prefs.getString("general_sound_mp3_path", "") ?: ""
+        set(value) = prefs.edit().putString("general_sound_mp3_path", value).apply()
+
     fun is24Hour(): Boolean = timeFormat == "24h"
 
     fun formatTimeOfDay(hour: Int, minute: Int): String {

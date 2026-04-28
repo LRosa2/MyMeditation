@@ -278,23 +278,30 @@ class TimerService : Service() {
         }
 
         if (shouldSound) {
-            if (trigger.type == "BELL") {
+            val useGlobalSound = globalMode == "sound_only" || globalMode == "sound_vibration"
+            val soundType = if (useGlobalSound) SettingsManager(this@TimerService).generalSoundType else trigger.type
+            val soundVolume = if (useGlobalSound) SettingsManager(this@TimerService).generalSoundVolume else trigger.volume
+            val soundExec = if (useGlobalSound) SettingsManager(this@TimerService).generalSoundExecutions else trigger.executions
+            val soundGap = if (useGlobalSound) SettingsManager(this@TimerService).generalSoundGapMs else trigger.gapMs
+
+            if (soundType == "BELL") {
                 AudioHelper.playBell(
                     context = this@TimerService,
-                    volume = trigger.volume,
+                    volume = soundVolume,
                     useAlarmStream = useAlarm,
-                    executions = trigger.executions,
-                    gapMs = trigger.gapMs
+                    executions = soundExec,
+                    gapMs = soundGap
                 )
-            } else if (trigger.type == "MP3") {
-                val path = trigger.mp3Path ?: return
+            } else if (soundType == "MP3") {
+                val path = if (useGlobalSound) SettingsManager(this@TimerService).generalSoundMp3Path else (trigger.mp3Path ?: return)
+                if (path.isBlank()) return
                 AudioHelper.playMp3(
                     context = this,
                     path = path,
-                    volume = trigger.volume,
+                    volume = soundVolume,
                     useAlarmStream = useAlarm,
-                    executions = trigger.executions,
-                    gapMs = trigger.gapMs
+                    executions = soundExec,
+                    gapMs = soundGap
                 )
             }
         }
