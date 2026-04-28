@@ -5,11 +5,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
 import android.widget.TextView
@@ -294,13 +299,37 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Exception) {
             "?"
         }
-        val message = """Version: $versionName
-Author: ${getString(R.string.app_author)}""".trimIndent()
+        val author = getString(R.string.app_author)
+        val email = getString(R.string.support_email)
+        val message = "Version: $versionName\nAuthor: $author\n\nSupport: $email"
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle(getString(R.string.app_name))
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton("Email") { _, _ ->
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:$email")
+                }
+                startActivity(Intent.createChooser(intent, "Send email"))
+            }
             .show()
+
+        // Make dialog text selectable so email can be copied
+        val textView = dialog.findViewById<TextView>(android.R.id.message)
+        textView?.apply {
+            text = SpannableString(text.toString()).apply {
+                val emailStart = toString().indexOf(email)
+                if (emailStart >= 0) {
+                    setSpan(
+                        URLSpan("mailto:$email"),
+                        emailStart,
+                        emailStart + email.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+            }
+            movementMethod = LinkMovementMethod.getInstance()
+        }
     }
 }

@@ -121,5 +121,6 @@
     <string name="theme_system">System</string>
 
     <!-- About -->
-    <string name="app_author">Your Name</string>
+    <string name="app_author">Luis Rosa</string>
+    <string name="support_email">luisribeirosa at gmail.com</string>
 </resources>
