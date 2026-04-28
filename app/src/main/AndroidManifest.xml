@@ -36,6 +36,7 @@
         <activity android:name=".ui.settings.SettingsActivity" />
         <activity android:name=".ui.stats.StatisticsActivity" />
         <activity android:name=".ui.stats.SittingLogActivity" />
+        <activity android:name=".ui.stats.ChainsActivity" />
 
         <service
             android:name=".service.TimerService"

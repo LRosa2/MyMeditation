@@ -27,7 +27,8 @@
             android:layout_weight="1"
             android:text="@string/import_csv"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_marginStart="4dp" />
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClearLog"
@@ -35,6 +36,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/clear_all"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddEntry"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:textSize="20sp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginStart="4dp" />
     </LinearLayout>

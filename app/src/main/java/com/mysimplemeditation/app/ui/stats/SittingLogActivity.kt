@@ -1,6 +1,8 @@
 package com.mysimplemeditation.app.ui.stats
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -14,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.mysimplemeditation.app.R
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.data.entities.LogEntryEntity
@@ -23,6 +27,7 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -62,6 +67,7 @@ class SittingLogActivity : AppCompatActivity() {
             importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain"))
         }
         binding.btnClearLog.setOnClickListener { confirmClearAll() }
+        binding.btnAddEntry.setOnClickListener { showAddEntryDialog() }
 
         loadLog()
     }
@@ -175,6 +181,54 @@ class SittingLogActivity : AppCompatActivity() {
                 Toast.makeText(this@SittingLogActivity, getString(R.string.import_csv_fail), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showAddEntryDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_log_entry, null)
+        val btnDateTime = dialogView.findViewById<MaterialButton>(R.id.btnPickDateTime)
+        val editHours = dialogView.findViewById<TextInputEditText>(R.id.editDurationHours)
+        val editMinutes = dialogView.findViewById<TextInputEditText>(R.id.editDurationMinutes)
+
+        val calendar = Calendar.getInstance()
+        val dateTimeFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+        btnDateTime.text = dateTimeFormat.format(calendar.time)
+
+        btnDateTime.setOnClickListener {
+            DatePickerDialog(this, { _, year, month, day ->
+                calendar.set(year, month, day)
+                TimePickerDialog(this, { _, hour, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                    calendar.set(Calendar.SECOND, 0)
+                    btnDateTime.text = dateTimeFormat.format(calendar.time)
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Add Sitting")
+            .setView(dialogView)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val hours = editHours.text.toString().toIntOrNull() ?: 0
+                val minutes = editMinutes.text.toString().toIntOrNull() ?: 0
+                val durationSeconds = hours * 3600 + minutes * 60
+                if (durationSeconds > 0) {
+                    lifecycleScope.launch {
+                        db.logDao().insertLog(
+                            LogEntryEntity(
+                                sessionId = null,
+                                sessionName = "Manual",
+                                startTime = calendar.timeInMillis,
+                                durationSeconds = durationSeconds
+                            )
+                        )
+                        loadLog()
+                        Toast.makeText(this@SittingLogActivity, "Entry added", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun formatDuration(totalSeconds: Int): String {
