@@ -25,6 +25,13 @@
         android:textColor="@color/meditation_text"
         android:visibility="gone" />
 
+    <ProgressBar
+        android:id="@+id/progressImport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerLog"
         android:layout_width="match_parent"

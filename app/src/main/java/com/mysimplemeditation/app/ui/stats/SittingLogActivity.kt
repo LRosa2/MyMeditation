@@ -164,6 +164,7 @@ class SittingLogActivity : AppCompatActivity() {
     private fun importCsv(uri: Uri) {
         lifecycleScope.launch {
             try {
+                binding.progressImport.visibility = View.VISIBLE
                 val reader = BufferedReader(InputStreamReader(contentResolver.openInputStream(uri)))
                 val lines = reader.readLines()
                 reader.close()
@@ -201,6 +202,8 @@ class SittingLogActivity : AppCompatActivity() {
                     getString(R.string.import_csv_success) + " ($imported entries)", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(this@SittingLogActivity, getString(R.string.import_csv_fail), Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.progressImport.visibility = View.GONE
             }
         }
     }
