@@ -165,7 +165,7 @@ object AudioHelper {
                     vibrator.vibrate(
                         VibrationEffect.createOneShot(
                             durationMs.toLong(),
-                            VibrationEffect.MAX_AMPLITUDE
+                            255
                         )
                     )
                 } else {
