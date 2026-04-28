@@ -39,6 +39,9 @@ interface LogDao {
 
     @Query("DELETE FROM log_entries WHERE id = :id")
     suspend fun deleteLogById(id: Long)
+
+    @Query("DELETE FROM log_entries")
+    suspend fun deleteAllLogs()
 }
 
 data class DailyTotal(

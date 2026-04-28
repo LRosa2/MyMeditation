@@ -104,6 +104,7 @@
     <string name="time_format_12h">12-hour (AM/PM)</string>
     <string name="browse">Browse</string>
     <string name="clear">Clear</string>
+    <string name="clear_all">Clear All</string>
     <string name="trigger_start_label">Start</string>
     <string name="trigger_end_label">End</string>
 

@@ -14,6 +14,7 @@ import com.mysimplemeditation.app.R
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.data.dao.DailyTotal
 import com.mysimplemeditation.app.databinding.ActivityStatisticsBinding
+import com.mysimplemeditation.app.util.SettingsManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -23,6 +24,7 @@ class StatisticsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStatisticsBinding
     private lateinit var db: AppDatabase
+    private lateinit var settings: SettingsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,11 @@ class StatisticsActivity : AppCompatActivity() {
         title = getString(R.string.menu_statistics)
 
         db = AppDatabase.getInstance(this)
+        settings = SettingsManager(this)
+
+        // Load saved threshold
+        binding.editChainMin.setText(settings.chainThresholdMinutes.toString())
+
         loadStats()
 
         binding.btnShowChains.setOnClickListener { loadChains() }
@@ -115,12 +122,11 @@ class StatisticsActivity : AppCompatActivity() {
     }
 
     private fun loadChains() {
-        val min1 = binding.editChainMin1.text.toString().toIntOrNull() ?: 1
-        val min2 = binding.editChainMin2.text.toString().toIntOrNull() ?: 30
-        val min3 = binding.editChainMin3.text.toString().toIntOrNull() ?: 45
+        val thresholdMinutes = binding.editChainMin.text.toString().toIntOrNull() ?: 45
+        val thresholdSeconds = thresholdMinutes * 60
 
-        // Use the first threshold for chains calculation
-        val thresholdSeconds = min1 * 60
+        // Save threshold preference
+        settings.chainThresholdMinutes = thresholdMinutes
 
         lifecycleScope.launch {
             val dailyTotals = db.logDao().getDailyTotals()
@@ -131,7 +137,6 @@ class StatisticsActivity : AppCompatActivity() {
     }
 
     private fun calculateChains(dailyTotals: List<DailyTotal>, thresholdSeconds: Int): List<Chain> {
-        // Build a set of days that meet the threshold
         val qualifyingDays = dailyTotals
             .filter { it.totalSeconds >= thresholdSeconds }
             .map { it.day }
@@ -139,7 +144,6 @@ class StatisticsActivity : AppCompatActivity() {
 
         if (qualifyingDays.isEmpty()) return emptyList()
 
-        // Sort qualifying days and find consecutive chains
         val sortedDays = qualifyingDays.sorted()
         val chains = mutableListOf<Chain>()
         var chainStart = sortedDays[0]
@@ -155,22 +159,32 @@ class StatisticsActivity : AppCompatActivity() {
             val diffDays = diffMs / (24 * 60 * 60 * 1000)
 
             if (diffDays == 1L) {
-                // Consecutive day
                 chainEnd = sortedDays[i]
                 chainDays++
             } else {
-                // Chain broken
                 chains.add(Chain(chainStart, chainEnd, chainDays))
                 chainStart = sortedDays[i]
                 chainEnd = sortedDays[i]
                 chainDays = 1
             }
         }
-        // Add last chain
         chains.add(Chain(chainStart, chainEnd, chainDays))
 
-        // Sort by days descending
-        return chains.sortedByDescending { it.days }
+        // Determine current chains (end today or yesterday)
+        val today = dateFormat.format(Calendar.getInstance().time)
+        val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+        val yesterdayStr = dateFormat.format(yesterday.time)
+
+        val marked = chains.map { chain ->
+            val isCurrent = chain.endDate == today || chain.endDate == yesterdayStr
+            chain.copy(isCurrent = isCurrent)
+        }
+
+        // Sort: current chains first, then by days descending
+        return marked.sortedWith(
+            compareByDescending<Chain> { it.isCurrent }
+                .thenByDescending { it.days }
+        )
     }
 
     private fun formatDuration(totalSeconds: Int): String {
@@ -183,7 +197,7 @@ class StatisticsActivity : AppCompatActivity() {
         }
     }
 
-    data class Chain(val startDate: String, val endDate: String, val days: Int)
+    data class Chain(val startDate: String, val endDate: String, val days: Int, val isCurrent: Boolean = false)
 
     inner class ChainAdapter(private val items: List<Chain>) :
         RecyclerView.Adapter<ChainAdapter.ViewHolder>() {
@@ -208,11 +222,13 @@ class StatisticsActivity : AppCompatActivity() {
 
             holder.range.text = getString(R.string.chain_date_range, startStr, endStr)
             holder.days.text = getString(R.string.chain_days, chain.days)
+            holder.current.visibility = if (chain.isCurrent) View.VISIBLE else View.GONE
         }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val range: TextView = view.findViewById(R.id.txtChainRange)
             val days: TextView = view.findViewById(R.id.txtChainDays)
+            val current: TextView = view.findViewById(R.id.txtChainCurrent)
         }
     }
 }

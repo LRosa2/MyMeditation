@@ -42,6 +42,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("theme_mode", "system") ?: "system"
         set(value) = prefs.edit().putString("theme_mode", value).apply()
 
+    var chainThresholdMinutes: Int
+        get() = prefs.getInt("chain_threshold_minutes", 45)
+        set(value) = prefs.edit().putInt("chain_threshold_minutes", value).apply()
+
     fun is24Hour(): Boolean = timeFormat == "24h"
 
     fun formatTimeOfDay(hour: Int, minute: Int): String {

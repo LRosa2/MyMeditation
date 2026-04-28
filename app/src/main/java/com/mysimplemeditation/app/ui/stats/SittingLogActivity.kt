@@ -61,6 +61,7 @@ class SittingLogActivity : AppCompatActivity() {
         binding.btnImportCsv.setOnClickListener {
             importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain"))
         }
+        binding.btnClearLog.setOnClickListener { confirmClearAll() }
 
         loadLog()
     }
@@ -89,6 +90,20 @@ class SittingLogActivity : AppCompatActivity() {
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 lifecycleScope.launch {
                     db.logDao().deleteLog(entry)
+                    loadLog()
+                }
+            }
+            .setNegativeButton(getString(R.string.no), null)
+            .show()
+    }
+
+    private fun confirmClearAll() {
+        AlertDialog.Builder(this)
+            .setTitle("Clear All")
+            .setMessage("Are you sure you want to delete ALL log entries?")
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                lifecycleScope.launch {
+                    db.logDao().deleteAllLogs()
                     loadLog()
                 }
             }
