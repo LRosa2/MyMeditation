@@ -46,6 +46,22 @@ class SettingsManager(context: Context) {
         get() = prefs.getInt("chain_threshold_minutes", 45)
         set(value) = prefs.edit().putInt("chain_threshold_minutes", value).apply()
 
+    var vibrationExecutions: Int
+        get() = prefs.getInt("vibration_executions", 2)
+        set(value) = prefs.edit().putInt("vibration_executions", value).apply()
+
+    var vibrationDurationMs: Int
+        get() = prefs.getInt("vibration_duration_ms", 500)
+        set(value) = prefs.edit().putInt("vibration_duration_ms", value).apply()
+
+    var vibrationGapMs: Int
+        get() = prefs.getInt("vibration_gap_ms", 1000)
+        set(value) = prefs.edit().putInt("vibration_gap_ms", value).apply()
+
+    var globalTriggerMode: String
+        get() = prefs.getString("global_trigger_mode", "default") ?: "default"
+        set(value) = prefs.edit().putString("global_trigger_mode", value).apply()
+
     fun is24Hour(): Boolean = timeFormat == "24h"
 
     fun formatTimeOfDay(hour: Int, minute: Int): String {

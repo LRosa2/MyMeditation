@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.VibrationEffect
+import android.os.Vibrator
 import com.mysimplemeditation.app.R
 import java.io.File
 
@@ -120,6 +122,40 @@ object AudioHelper {
                 }
 
                 remaining--
+                if (remaining > 0) {
+                    Thread.sleep(gapMs.toLong())
+                }
+            }
+            onAllComplete?.invoke()
+        }.start()
+    }
+
+    fun playVibration(
+        context: Context,
+        durationMs: Int = 500,
+        executions: Int = 1,
+        gapMs: Int = 1000,
+        onAllComplete: (() -> Unit)? = null
+    ) {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (!vibrator.hasVibrator()) {
+            onAllComplete?.invoke()
+            return
+        }
+        Thread {
+            for (i in 1..executions) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                            durationMs.toLong(),
+                            VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(durationMs.toLong())
+                }
+                val remaining = executions - i
                 if (remaining > 0) {
                     Thread.sleep(gapMs.toLong())
                 }

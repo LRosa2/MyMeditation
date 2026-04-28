@@ -34,8 +34,9 @@ class TimerService : Service() {
         const val ACTION_ENDED = "com.mysimplemeditation.app.ENDED"
 
         const val EXTRA_SESSION_ID = "session_id"
-        const val EXTRA_VOLUME = "volume"
-        const val EXTRA_USE_ALARM = "use_alarm"
+        const val EXTRA_VOLUME = "extra_volume"
+        const val EXTRA_USE_ALARM = "extra_use_alarm"
+        const val EXTRA_GLOBAL_MODE = "extra_global_mode"
         const val EXTRA_REMAINING = "remaining"
         const val EXTRA_ELAPSED = "elapsed"
         const val EXTRA_PHASE = "phase"
@@ -65,6 +66,7 @@ class TimerService : Service() {
     private var sessionId: Long = -1
     private var volume: Int = 80
     private var useAlarm: Boolean = false
+    private var globalMode: String = "default"
     private var isClosedSession: Boolean = false
     private var preparationSeconds: Int = 0
     private var totalSittingSeconds: Int = 0
@@ -92,6 +94,7 @@ class TimerService : Service() {
                 sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
                 volume = intent.getIntExtra(EXTRA_VOLUME, 80)
                 useAlarm = intent.getBooleanExtra(EXTRA_USE_ALARM, false)
+                globalMode = intent.getStringExtra(EXTRA_GLOBAL_MODE) ?: "default"
                 startTimer()
             }
             ACTION_STOP -> {
@@ -250,24 +253,50 @@ class TimerService : Service() {
     }
 
     private fun executeTrigger(trigger: TriggerEntity) {
-        if (trigger.type == "BELL") {
-            AudioHelper.playBell(
+        val shouldVibrate = trigger.vibrate || globalMode == "vibration_only" || globalMode == "sound_vibration"
+        val shouldSound = (trigger.type != "VIBRATE" && globalMode == "default") ||
+            globalMode == "sound_only" || globalMode == "sound_vibration"
+
+        if (shouldVibrate) {
+            val vibDuration = if (trigger.vibrate) trigger.vibrationDuration else 500
+            val vibExec = if (globalMode == "vibration_only" || globalMode == "sound_vibration") {
+                SettingsManager(this@TimerService).vibrationExecutions
+            } else {
+                trigger.executions
+            }
+            val vibGap = if (globalMode == "vibration_only" || globalMode == "sound_vibration") {
+                SettingsManager(this@TimerService).vibrationGapMs
+            } else {
+                trigger.gapMs
+            }
+            AudioHelper.playVibration(
                 context = this@TimerService,
-                volume = trigger.volume,
-                useAlarmStream = useAlarm,
-                executions = trigger.executions,
-                gapMs = trigger.gapMs
+                durationMs = vibDuration,
+                executions = vibExec,
+                gapMs = vibGap
             )
-        } else {
-            val path = trigger.mp3Path ?: return
-            AudioHelper.playMp3(
-                context = this,
-                path = path,
-                volume = trigger.volume,
-                useAlarmStream = useAlarm,
-                executions = trigger.executions,
-                gapMs = trigger.gapMs
-            )
+        }
+
+        if (shouldSound) {
+            if (trigger.type == "BELL") {
+                AudioHelper.playBell(
+                    context = this@TimerService,
+                    volume = trigger.volume,
+                    useAlarmStream = useAlarm,
+                    executions = trigger.executions,
+                    gapMs = trigger.gapMs
+                )
+            } else if (trigger.type == "MP3") {
+                val path = trigger.mp3Path ?: return
+                AudioHelper.playMp3(
+                    context = this,
+                    path = path,
+                    volume = trigger.volume,
+                    useAlarmStream = useAlarm,
+                    executions = trigger.executions,
+                    gapMs = trigger.gapMs
+                )
+            }
         }
     }
 

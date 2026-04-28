@@ -94,6 +94,92 @@
             android:textColor="@color/meditation_text" />
     </RadioGroup>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vibration Settings"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/meditation_text"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Executions"
+            android:textColor="@color/meditation_text"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/editVibExecutions"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:textColor="@color/meditation_text"
+            android:text="2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration (ms)"
+            android:textColor="@color/meditation_text"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/editVibDuration"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:textColor="@color/meditation_text"
+            android:text="500" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gap (ms)"
+            android:textColor="@color/meditation_text"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/editVibGap"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:textColor="@color/meditation_text"
+            android:text="1000" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTestVibration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Vibration"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginBottom="16dp" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnExportDb"
         android:layout_width="match_parent"

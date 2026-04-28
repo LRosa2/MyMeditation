@@ -25,7 +25,9 @@ data class TriggerEntity(
     val repeating: Boolean = false,
     val repeatIntervalMinutes: Int = 5,
     val executions: Int = 1,
-    val gapMs: Int = 500
+    val gapMs: Int = 500,
+    val vibrate: Boolean = false,
+    val vibrationDuration: Int = 500 // ms
 ) {
     companion object {
         const val TIME_START = 0

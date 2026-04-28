@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         requestNotificationPermission()
 
         setupVolumeSlider()
+        setupTriggerModeSpinner()
         setupButtons()
 
         lifecycleScope.launch {
@@ -205,12 +206,41 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun setupTriggerModeSpinner() {
+        val modes = listOf("Default (Session)", "Only Vibration", "Only Sound", "Sound + Vibration")
+        val adapter = ArrayAdapter(this, R.layout.spinner_item_dark, modes)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
+        binding.spinnerTriggerMode.adapter = adapter
+
+        val currentMode = settings.globalTriggerMode
+        val selection = when (currentMode) {
+            "vibration_only" -> 1
+            "sound_only" -> 2
+            "sound_vibration" -> 3
+            else -> 0
+        }
+        binding.spinnerTriggerMode.setSelection(selection)
+
+        binding.spinnerTriggerMode.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                settings.globalTriggerMode = when (pos) {
+                    1 -> "vibration_only"
+                    2 -> "sound_only"
+                    3 -> "sound_vibration"
+                    else -> "default"
+                }
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+    }
+
     private fun setupButtons() {
         binding.btnStart.setOnClickListener {
             val session = selectedSession ?: return@setOnClickListener
 
             val volume = binding.seekBarVolume.progress
             val useAlarm = settings.playAsAlarm
+            val globalMode = settings.globalTriggerMode
 
             // Save volume before starting
             if (settings.rememberVolume) {
@@ -222,6 +252,7 @@ class MainActivity : AppCompatActivity() {
                 putExtra(TimerService.EXTRA_SESSION_ID, session.id)
                 putExtra(TimerService.EXTRA_VOLUME, volume)
                 putExtra(TimerService.EXTRA_USE_ALARM, useAlarm)
+                putExtra(TimerService.EXTRA_GLOBAL_MODE, globalMode)
             }
             startForegroundService(intent)
         }

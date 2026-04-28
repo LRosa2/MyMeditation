@@ -2,6 +2,8 @@ package com.mysimplemeditation.app.ui.settings
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -61,6 +63,33 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.chkPlayAsAlarm.setOnCheckedChangeListener { _, isChecked ->
             settings.playAsAlarm = isChecked
+        }
+
+        // Vibration settings
+        binding.editVibExecutions.setText(settings.vibrationExecutions.toString())
+        binding.editVibDuration.setText(settings.vibrationDurationMs.toString())
+        binding.editVibGap.setText(settings.vibrationGapMs.toString())
+
+        val vibWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                settings.vibrationExecutions = binding.editVibExecutions.text.toString().toIntOrNull() ?: 2
+                settings.vibrationDurationMs = binding.editVibDuration.text.toString().toIntOrNull() ?: 500
+                settings.vibrationGapMs = binding.editVibGap.text.toString().toIntOrNull() ?: 1000
+            }
+        }
+        binding.editVibExecutions.addTextChangedListener(vibWatcher)
+        binding.editVibDuration.addTextChangedListener(vibWatcher)
+        binding.editVibGap.addTextChangedListener(vibWatcher)
+
+        binding.btnTestVibration.setOnClickListener {
+            com.mysimplemeditation.app.util.AudioHelper.playVibration(
+                context = this,
+                durationMs = settings.vibrationDurationMs,
+                executions = settings.vibrationExecutions,
+                gapMs = settings.vibrationGapMs
+            )
         }
 
         binding.btnExportDb.setOnClickListener { exportDatabase() }

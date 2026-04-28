@@ -196,6 +196,9 @@ class SessionEditActivity : AppCompatActivity() {
         val editRepeatInterval = dialogView.findViewById<EditText>(R.id.editRepeatInterval)
         val editExecutions = dialogView.findViewById<EditText>(R.id.editExecutions)
         val editGap = dialogView.findViewById<EditText>(R.id.editGap)
+        val chkVibrate = dialogView.findViewById<CheckBox>(R.id.chkVibrate)
+        val layoutVibrationDuration = dialogView.findViewById<View>(R.id.layoutVibrationDuration)
+        val editVibrationDuration = dialogView.findViewById<EditText>(R.id.editVibrationDuration)
         val btnSave = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnSaveTrigger)
         val btnCancel = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelTrigger)
         val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnTestTrigger)
@@ -204,7 +207,7 @@ class SessionEditActivity : AppCompatActivity() {
         val triggerTypeAdapter = ArrayAdapter(
             this,
             R.layout.spinner_item_dark,
-            listOf("Ring Bell", "Play MP3 Track")
+            listOf("Ring Bell", "Play MP3 Track", "Vibration")
         )
         triggerTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         spinnerType.adapter = triggerTypeAdapter
@@ -212,12 +215,17 @@ class SessionEditActivity : AppCompatActivity() {
         spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 layoutMp3Path.visibility = if (pos == 1) View.VISIBLE else View.GONE
+                seekBarVolume.visibility = if (pos == 2) View.GONE else View.VISIBLE
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
 
         chkRepeating.setOnCheckedChangeListener { _, isChecked ->
             layoutRepeatInterval.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        chkVibrate.setOnCheckedChangeListener { _, isChecked ->
+            layoutVibrationDuration.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
         // Browse button for MP3 file
@@ -230,15 +238,19 @@ class SessionEditActivity : AppCompatActivity() {
         // Fill existing values
         if (existing != null) {
             pickerStartTime.value = existing.startTimeSeconds
-            spinnerType.setSelection(if (existing.type == "BELL") 0 else 1)
+            spinnerType.setSelection(when (existing.type) { "BELL" -> 0; "MP3" -> 1; else -> 2 })
             editMp3Path.setText(existing.mp3Path ?: "")
             seekBarVolume.progress = existing.volume
+            seekBarVolume.visibility = if (existing.type == "VIBRATE") View.GONE else View.VISIBLE
             chkRepeating.isChecked = existing.repeating
             editRepeatInterval.setText(existing.repeatIntervalMinutes.toString())
             editExecutions.setText(existing.executions.toString())
             editGap.setText(existing.gapMs.toString())
+            chkVibrate.isChecked = existing.vibrate
+            editVibrationDuration.setText(existing.vibrationDuration.toString())
             layoutMp3Path.visibility = if (existing.type == "MP3") View.VISIBLE else View.GONE
             layoutRepeatInterval.visibility = if (existing.repeating) View.VISIBLE else View.GONE
+            layoutVibrationDuration.visibility = if (existing.vibrate) View.VISIBLE else View.GONE
         }
 
         val dialog = AlertDialog.Builder(this)
@@ -248,13 +260,19 @@ class SessionEditActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             val startTime = pickerStartTime.value
-            val triggerType = if (spinnerType.selectedItemPosition == 0) "BELL" else "MP3"
+            val triggerType = when (spinnerType.selectedItemPosition) {
+                0 -> "BELL"
+                1 -> "MP3"
+                else -> "VIBRATE"
+            }
             val mp3Path = if (triggerType == "MP3") editMp3Path.text.toString() else null
-            val vol = seekBarVolume.progress
+            val vol = if (triggerType == "VIBRATE") 0 else seekBarVolume.progress
             val repeating = chkRepeating.isChecked
             val repeatInterval = editRepeatInterval.text.toString().toIntOrNull() ?: 5
             val executions = editExecutions.text.toString().toIntOrNull() ?: 1
             val gapMs = editGap.text.toString().toIntOrNull() ?: 500
+            val vibrate = chkVibrate.isChecked
+            val vibrationDuration = editVibrationDuration.text.toString().toIntOrNull() ?: 500
 
             val trigger = TriggerEntity(
                 id = existing?.id ?: 0,
@@ -266,7 +284,9 @@ class SessionEditActivity : AppCompatActivity() {
                 repeating = repeating,
                 repeatIntervalMinutes = repeatInterval,
                 executions = executions,
-                gapMs = gapMs
+                gapMs = gapMs,
+                vibrate = vibrate,
+                vibrationDuration = vibrationDuration
             )
 
             if (existing != null) {
@@ -283,26 +303,36 @@ class SessionEditActivity : AppCompatActivity() {
         btnCancel.setOnClickListener { dialog.dismiss() }
 
         btnTest.setOnClickListener {
-            val triggerType = if (spinnerType.selectedItemPosition == 0) "BELL" else "MP3"
+            val triggerType = when (spinnerType.selectedItemPosition) {
+                0 -> "BELL"
+                1 -> "MP3"
+                else -> "VIBRATE"
+            }
             val vol = seekBarVolume.progress
             val executions = editExecutions.text.toString().toIntOrNull() ?: 1
             val gapMs = editGap.text.toString().toIntOrNull() ?: 500
             val mp3Path = editMp3Path.text.toString()
+            val vibrationDuration = editVibrationDuration.text.toString().toIntOrNull() ?: 500
 
-            if (triggerType == "BELL") {
-                AudioHelper.playBell(
+            when (triggerType) {
+                "BELL" -> AudioHelper.playBell(
                     context = this@SessionEditActivity,
                     volume = vol,
                     useAlarmStream = settings.playAsAlarm,
                     executions = executions,
                     gapMs = gapMs
                 )
-            } else {
-                AudioHelper.playMp3(
+                "MP3" -> AudioHelper.playMp3(
                     context = this,
                     path = mp3Path,
                     volume = vol,
                     useAlarmStream = settings.playAsAlarm,
+                    executions = executions,
+                    gapMs = gapMs
+                )
+                else -> AudioHelper.playVibration(
+                    context = this@SessionEditActivity,
+                    durationMs = vibrationDuration,
                     executions = executions,
                     gapMs = gapMs
                 )

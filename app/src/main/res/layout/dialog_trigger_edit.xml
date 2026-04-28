@@ -78,11 +78,41 @@
 
         <CheckBox
             android:id="@+id/chkRepeating"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/trigger_repeating"
-            android:textColor="@color/meditation_text"
-            android:layout_marginBottom="4dp" />
+            android:text="Repeating"
+            android:textColor="@color/white" />
+
+        <!-- Vibration -->
+        <CheckBox
+            android:id="@+id/chkVibrate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vibration"
+            android:textColor="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/layoutVibrationDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Duration (ms)"
+                android:textColor="@color/white"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/editVibrationDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/meditation_accent"
+                android:text="500" />
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutRepeatInterval"
