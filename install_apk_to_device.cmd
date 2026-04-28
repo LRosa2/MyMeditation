@@ -1,0 +1,1 @@
+adb -s ZT322VGCZJ install -r "app\release\app-release.apk"
