@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 class StatisticsActivity : AppCompatActivity() {
 
@@ -150,13 +151,17 @@ class StatisticsActivity : AppCompatActivity() {
         var chainEnd = sortedDays[0]
         var chainDays = 1
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        // Use UTC timezone so day differences are exact (no DST issues)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val dayMs = 24L * 60L * 60L * 1000L
 
         for (i in 1 until sortedDays.size) {
             val prevDate = dateFormat.parse(sortedDays[i - 1])
             val currDate = dateFormat.parse(sortedDays[i])
             val diffMs = (currDate?.time ?: 0L) - (prevDate?.time ?: 0L)
-            val diffDays = diffMs / (24 * 60 * 60 * 1000)
+            val diffDays = diffMs / dayMs
 
             if (diffDays == 1L) {
                 chainEnd = sortedDays[i]
@@ -180,9 +185,9 @@ class StatisticsActivity : AppCompatActivity() {
             chain.copy(isCurrent = isCurrent)
         }
 
-        // Sort: current chains first, then by days descending
+        // Sort by end date descending (newest chain first), then by days descending
         return marked.sortedWith(
-            compareByDescending<Chain> { it.isCurrent }
+            compareByDescending<Chain> { it.endDate }
                 .thenByDescending { it.days }
         )
     }
