@@ -108,6 +108,19 @@ class MainActivity : AppCompatActivity() {
         }
         registerReceiver(timerReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
 
+        // Sync with service state in case broadcasts were missed while screen was off
+        if (TimerService.isRunning) {
+            isTimerRunning = true
+            updateButtonStates()
+            updateTimerDisplay(TimerService.lastRemaining, TimerService.lastElapsed, TimerService.lastPhase)
+        } else if (isTimerRunning) {
+            // Timer ended while we were away
+            isTimerRunning = false
+            updateButtonStates()
+            binding.txtTimer.text = "00:00:00"
+            binding.txtPhase.text = getString(R.string.session_ended)
+        }
+
         lifecycleScope.launch {
             loadSessions()
         }
@@ -225,9 +238,10 @@ class MainActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         binding.spinnerSession.adapter = adapter
 
-        // Select default or last used session
+        // Preserve current selection if it still exists, otherwise fall back to default
+        val preservedSession = selectedSession?.takeIf { s -> sessions.any { it.id == s.id } }
         val defaultSession = sessions.find { it.isDefault }
-        val target = defaultSession ?: sessions.first()
+        val target = preservedSession ?: defaultSession ?: sessions.first()
         val index = sessions.indexOf(target)
         binding.spinnerSession.setSelection(index)
         selectedSession = target

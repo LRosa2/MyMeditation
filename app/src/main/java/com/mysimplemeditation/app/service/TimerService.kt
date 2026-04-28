@@ -42,6 +42,19 @@ class TimerService : Service() {
 
         private const val CHANNEL_ID = "mymeditation_timer"
         private const val NOTIFICATION_ID = 1
+
+        @Volatile
+        var isRunning = false
+            private set
+        @Volatile
+        var lastRemaining = 0
+            private set
+        @Volatile
+        var lastElapsed = 0
+            private set
+        @Volatile
+        var lastPhase = ""
+            private set
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -125,6 +138,7 @@ class TimerService : Service() {
             currentPhase = if (preparationSeconds > 0) "Preparing" else "Sitting"
 
             sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
+            isRunning = true
 
             timerJob = serviceScope.launch(Dispatchers.IO) {
                 while (isActive) {
@@ -170,6 +184,10 @@ class TimerService : Service() {
                         setPackage(packageName)
                     }
                     sendBroadcast(tickIntent)
+
+                    lastRemaining = remaining.coerceAtLeast(0)
+                    lastElapsed = elapsedSeconds
+                    lastPhase = currentPhase
 
                     // Update notification
                     val notifText = if (isClosedSession) {
@@ -256,6 +274,10 @@ class TimerService : Service() {
     private suspend fun endSession() {
         executeEndTriggers()
         logSession()
+        isRunning = false
+        lastRemaining = 0
+        lastElapsed = 0
+        lastPhase = ""
         sendBroadcast(Intent(ACTION_ENDED).setPackage(packageName))
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -269,6 +291,10 @@ class TimerService : Service() {
             timerJob?.cancel()
             repeatingTriggerTimers.values.forEach { it.cancel() }
             repeatingTriggerTimers.clear()
+            isRunning = false
+            lastRemaining = 0
+            lastElapsed = 0
+            lastPhase = ""
             sendBroadcast(Intent(ACTION_STOPPED).setPackage(packageName))
             releaseWakeLock()
             stopForeground(STOP_FOREGROUND_REMOVE)
