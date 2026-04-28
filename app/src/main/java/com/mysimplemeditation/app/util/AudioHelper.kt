@@ -4,8 +4,12 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
+import android.util.Log
+import android.widget.Toast
 import com.mysimplemeditation.app.R
 import java.io.File
 
@@ -137,18 +141,31 @@ object AudioHelper {
         gapMs: Int = 1000,
         onAllComplete: (() -> Unit)? = null
     ) {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
         if (!vibrator.hasVibrator()) {
+            Log.w("AudioHelper", "playVibration: device has no vibrator")
+            Toast.makeText(context, "No vibrator available on this device", Toast.LENGTH_SHORT).show()
             onAllComplete?.invoke()
             return
         }
+
+        Log.d("AudioHelper", "playVibration: duration=$durationMs, exec=$executions, gap=$gapMs")
+        Toast.makeText(context, "Vibrating...", Toast.LENGTH_SHORT).show()
+
         Thread {
             for (i in 1..executions) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vibrator.vibrate(
                         VibrationEffect.createOneShot(
                             durationMs.toLong(),
-                            VibrationEffect.DEFAULT_AMPLITUDE
+                            VibrationEffect.MAX_AMPLITUDE
                         )
                     )
                 } else {
