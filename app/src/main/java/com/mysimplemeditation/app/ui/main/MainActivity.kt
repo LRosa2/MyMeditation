@@ -164,6 +164,10 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, StatisticsActivity::class.java))
                 true
             }
+            R.id.menu_about -> {
+                showAboutDialog()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -282,5 +286,21 @@ class MainActivity : AppCompatActivity() {
         val m = (totalSeconds % 3600) / 60
         val s = totalSeconds % 60
         return String.format("%02d:%02d:%02d", h, m, s)
+    }
+
+    private fun showAboutDialog() {
+        val versionName = try {
+            packageManager.getPackageInfo(packageName, 0).versionName
+        } catch (_: Exception) {
+            "?"
+        }
+        val message = """Version: $versionName
+Author: ${getString(R.string.app_author)}""".trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.app_name))
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 }
