@@ -1,0 +1,16 @@
+MyMeditation is a clean, minimal meditation timer for Android. No ads, no tracking, no distractions — just a simple companion for your sitting practice.
+
+Features:
+- Multiple meditation sessions with custom settings
+- Closed (countdown) and Open (stopwatch) session types
+- Preparation time before session begins
+- Bell sounds and MP3 triggers at specific moments
+- Configurable repeat intervals, execution counts, and gaps
+- Daily reminders with smart threshold
+- Statistics: track total meditation time (today, week, month, all time)
+- Chain tracking: see your consecutive-day meditation streaks
+- Sitting log: full history with CSV export/import
+- Database backup: export and import your complete data
+- Background timer: keeps running even when screen is off
+- Alarm mode: play sounds as alarms to bypass Do Not Disturb
+- Dark theme support

@@ -1,0 +1,6 @@
+Version 1.1:
+- Fixed timer state when screen turns off during meditation
+- Added About dialog with version and author information
+- Improved sitting log UI with import progress indicator
+- Added chain tracking for meditation streaks
+- UI refinements and polish
