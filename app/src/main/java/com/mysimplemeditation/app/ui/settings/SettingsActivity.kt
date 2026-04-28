@@ -96,18 +96,18 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showSoundConfigDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_general_sound, null)
-        val spinnerType = dialogView.findViewById<android.widget.Spinner>(R.id.spinnerGeneralSoundType)
-        val layoutMp3Path = dialogView.findViewById<android.view.View>(R.id.layoutGeneralMp3Path)
-        val editMp3Path = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralMp3Path)
-        val btnBrowse = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnGeneralBrowseMp3)
-        val seekBarVolume = dialogView.findViewById<SeekBar>(R.id.seekBarGeneralVolume)
-        val editExec = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralSoundExecutions)
-        val editGap = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralSoundGap)
-        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnTestGeneralSound)
+        val dialogView = layoutInflater.inflate(com.mysimplemeditation.app.R.layout.dialog_general_sound, null)
+        val spinnerType = dialogView.findViewById<android.widget.Spinner>(com.mysimplemeditation.app.R.id.spinnerGeneralSoundType)
+        val layoutMp3Path = dialogView.findViewById<View>(com.mysimplemeditation.app.R.id.layoutGeneralMp3Path)
+        val editMp3Path = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralMp3Path)
+        val btnBrowse = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnGeneralBrowseMp3)
+        val seekBarVolume = dialogView.findViewById<SeekBar>(com.mysimplemeditation.app.R.id.seekBarGeneralVolume)
+        val editExec = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralSoundExecutions)
+        val editGap = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralSoundGap)
+        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnTestGeneralSound)
 
-        val typeAdapter = ArrayAdapter(this, R.layout.spinner_item_dark, listOf("Bell", "MP3"))
-        typeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
+        val typeAdapter = ArrayAdapter(this, com.mysimplemeditation.app.R.layout.spinner_item_dark, listOf("Bell", "MP3"))
+        typeAdapter.setDropDownViewResource(com.mysimplemeditation.app.R.layout.spinner_dropdown_item_dark)
         spinnerType.adapter = typeAdapter
         spinnerType.setSelection(if (settings.generalSoundType == "BELL") 0 else 1)
 
@@ -158,11 +158,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showVibrationConfigDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_general_vibration, null)
-        val editExec = dialogView.findViewById<EditText>(R.id.editGeneralVibExecutions)
-        val editDuration = dialogView.findViewById<EditText>(R.id.editGeneralVibDuration)
-        val editGap = dialogView.findViewById<EditText>(R.id.editGeneralVibGap)
-        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnTestGeneralVibration)
+        val dialogView = layoutInflater.inflate(com.mysimplemeditation.app.R.layout.dialog_general_vibration, null)
+        val editExec = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibExecutions)
+        val editDuration = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibDuration)
+        val editGap = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibGap)
+        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnTestGeneralVibration)
 
         editExec.setText(settings.vibrationExecutions.toString())
         editDuration.setText(settings.vibrationDurationMs.toString())
