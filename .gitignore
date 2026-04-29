@@ -76,3 +76,6 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+
+# Gradle daemon JVM properties
+gradle/gradle-daemon-jvm.properties
