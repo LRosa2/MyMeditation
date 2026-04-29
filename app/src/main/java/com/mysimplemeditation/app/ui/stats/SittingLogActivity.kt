@@ -113,8 +113,12 @@ class SittingLogActivity : AppCompatActivity() {
     }
 
     private fun confirmDelete(entry: LogEntryEntity) {
+        val dateFormat = settings.getDateTimeFormat()
+        val dateStr = dateFormat.format(Date(entry.startTime))
+        val entryInfo = "$dateStr  ${formatDuration(entry.durationSeconds)}"
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.confirm_delete))
+            .setMessage(entryInfo)
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 lifecycleScope.launch {
                     db.logDao().deleteLog(entry)
