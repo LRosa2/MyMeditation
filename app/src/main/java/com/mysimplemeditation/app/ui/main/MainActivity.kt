@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private var sessions = listOf<SessionEntity>()
     private var selectedSession: SessionEntity? = null
     private var isTimerRunning = false
+    private var isTimerPaused = false
 
     private val timerReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -57,19 +58,30 @@ class MainActivity : AppCompatActivity() {
                 }
                 TimerService.ACTION_STARTED -> {
                     isTimerRunning = true
+                    isTimerPaused = false
                     updateButtonStates()
                 }
                 TimerService.ACTION_STOPPED -> {
                     isTimerRunning = false
+                    isTimerPaused = false
                     updateButtonStates()
                     binding.txtTimer.text = "00:00:00"
                     binding.txtPhase.text = ""
                 }
                 TimerService.ACTION_ENDED -> {
                     isTimerRunning = false
+                    isTimerPaused = false
                     updateButtonStates()
                     binding.txtTimer.text = "00:00:00"
                     binding.txtPhase.text = getString(R.string.session_ended)
+                }
+                TimerService.ACTION_PAUSED -> {
+                    isTimerPaused = true
+                    updateButtonStates()
+                }
+                TimerService.ACTION_RESUMED -> {
+                    isTimerPaused = false
+                    updateButtonStates()
                 }
             }
         }
@@ -111,17 +123,21 @@ class MainActivity : AppCompatActivity() {
             addAction(TimerService.ACTION_STARTED)
             addAction(TimerService.ACTION_STOPPED)
             addAction(TimerService.ACTION_ENDED)
+            addAction(TimerService.ACTION_PAUSED)
+            addAction(TimerService.ACTION_RESUMED)
         }
         registerReceiver(timerReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
 
         // Sync with service state in case broadcasts were missed while screen was off
         if (TimerService.isRunning) {
             isTimerRunning = true
+            isTimerPaused = TimerService.isPaused
             updateButtonStates()
             updateTimerDisplay(TimerService.lastRemaining, TimerService.lastElapsed, TimerService.lastPhase)
         } else if (isTimerRunning) {
             // Timer ended while we were away
             isTimerRunning = false
+            isTimerPaused = false
             updateButtonStates()
             binding.txtTimer.text = "00:00:00"
             binding.txtPhase.text = getString(R.string.session_ended)
@@ -236,25 +252,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         binding.btnStart.setOnClickListener {
-            val session = selectedSession ?: return@setOnClickListener
+            when {
+                isTimerPaused -> {
+                    val intent = Intent(this, TimerService::class.java).apply {
+                        action = TimerService.ACTION_RESUME
+                    }
+                    startService(intent)
+                }
+                isTimerRunning -> {
+                    val intent = Intent(this, TimerService::class.java).apply {
+                        action = TimerService.ACTION_PAUSE
+                    }
+                    startService(intent)
+                }
+                else -> {
+                    val session = selectedSession ?: return@setOnClickListener
 
-            val volume = binding.seekBarVolume.progress
-            val useAlarm = settings.playAsAlarm
-            val globalMode = settings.globalTriggerMode
+                    val volume = binding.seekBarVolume.progress
+                    val useAlarm = settings.playAsAlarm
+                    val globalMode = settings.globalTriggerMode
 
-            // Save volume before starting
-            if (settings.rememberVolume) {
-                AudioHelper.saveCurrentVolume(this, settings)
+                    // Save volume before starting
+                    if (settings.rememberVolume) {
+                        AudioHelper.saveCurrentVolume(this, settings)
+                    }
+
+                    val intent = Intent(this, TimerService::class.java).apply {
+                        action = TimerService.ACTION_START
+                        putExtra(TimerService.EXTRA_SESSION_ID, session.id)
+                        putExtra(TimerService.EXTRA_VOLUME, volume)
+                        putExtra(TimerService.EXTRA_USE_ALARM, useAlarm)
+                        putExtra(TimerService.EXTRA_GLOBAL_MODE, globalMode)
+                    }
+                    startForegroundService(intent)
+                }
             }
-
-            val intent = Intent(this, TimerService::class.java).apply {
-                action = TimerService.ACTION_START
-                putExtra(TimerService.EXTRA_SESSION_ID, session.id)
-                putExtra(TimerService.EXTRA_VOLUME, volume)
-                putExtra(TimerService.EXTRA_USE_ALARM, useAlarm)
-                putExtra(TimerService.EXTRA_GLOBAL_MODE, globalMode)
-            }
-            startForegroundService(intent)
         }
 
         binding.btnStop.setOnClickListener {
@@ -312,9 +344,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateButtonStates() {
-        binding.btnStart.isEnabled = !isTimerRunning
-        binding.btnStop.isEnabled = isTimerRunning
-        binding.spinnerSession.isEnabled = !isTimerRunning
+        when {
+            isTimerPaused -> {
+                binding.btnStart.text = getString(R.string.resume)
+                binding.btnStart.isEnabled = true
+                binding.btnStop.isEnabled = true
+                binding.spinnerSession.isEnabled = false
+            }
+            isTimerRunning -> {
+                binding.btnStart.text = getString(R.string.pause)
+                binding.btnStart.isEnabled = true
+                binding.btnStop.isEnabled = true
+                binding.spinnerSession.isEnabled = false
+            }
+            else -> {
+                binding.btnStart.text = getString(R.string.start)
+                binding.btnStart.isEnabled = true
+                binding.btnStop.isEnabled = false
+                binding.spinnerSession.isEnabled = true
+            }
+        }
     }
 
     private fun formatTime(totalSeconds: Int): String {

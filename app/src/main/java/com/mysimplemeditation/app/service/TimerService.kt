@@ -32,6 +32,10 @@ class TimerService : Service() {
         const val ACTION_STARTED = "com.mysimplemeditation.app.STARTED"
         const val ACTION_STOPPED = "com.mysimplemeditation.app.STOPPED"
         const val ACTION_ENDED = "com.mysimplemeditation.app.ENDED"
+        const val ACTION_PAUSE = "com.mysimplemeditation.app.PAUSE"
+        const val ACTION_RESUME = "com.mysimplemeditation.app.RESUME"
+        const val ACTION_PAUSED = "com.mysimplemeditation.app.PAUSED"
+        const val ACTION_RESUMED = "com.mysimplemeditation.app.RESUMED"
 
         const val EXTRA_SESSION_ID = "session_id"
         const val EXTRA_VOLUME = "extra_volume"
@@ -46,6 +50,9 @@ class TimerService : Service() {
 
         @Volatile
         var isRunning = false
+            private set
+        @Volatile
+        var isPaused = false
             private set
         @Volatile
         var lastRemaining = 0
@@ -77,6 +84,8 @@ class TimerService : Service() {
     private var currentPhase: String = ""
     private var elapsedSeconds: Int = 0
     private var startTimeMs: Long = 0L
+    private var segmentStartTimeMs: Long = 0L
+    private var segmentStartElapsed: Int = 0
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate() {
@@ -99,6 +108,12 @@ class TimerService : Service() {
             }
             ACTION_STOP -> {
                 stopTimer()
+            }
+            ACTION_PAUSE -> {
+                pauseTimer()
+            }
+            ACTION_RESUME -> {
+                resumeTimer()
             }
         }
         return START_NOT_STICKY
@@ -138,69 +153,76 @@ class TimerService : Service() {
 
             startTimeMs = System.currentTimeMillis()
             elapsedSeconds = 0
+            segmentStartTimeMs = startTimeMs
+            segmentStartElapsed = 0
             currentPhase = if (preparationSeconds > 0) "Preparing" else "Sitting"
 
             sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
             isRunning = true
+            isPaused = false
 
-            timerJob = serviceScope.launch(Dispatchers.IO) {
-                while (isActive) {
-                    delay(1000)
-                    elapsedSeconds++
+            runTimerLoop()
+        }
+    }
 
-                    val totalSessionSeconds = preparationSeconds + totalSittingSeconds
-                    val remaining = if (isClosedSession) {
-                        totalSessionSeconds - elapsedSeconds
-                    } else 0
+    private fun runTimerLoop() {
+        timerJob = serviceScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                delay(1000)
+                elapsedSeconds++
 
-                    // Determine phase
-                    currentPhase = if (elapsedSeconds <= preparationSeconds) {
-                        "Preparing"
-                    } else {
-                        "Sitting"
-                    }
+                val totalSessionSeconds = preparationSeconds + totalSittingSeconds
+                val remaining = if (isClosedSession) {
+                    totalSessionSeconds - elapsedSeconds
+                } else 0
 
-                    // Check if session ended
-                    if (isClosedSession && remaining <= 0) {
-                        currentPhase = "Ended"
-                        withContext(Dispatchers.Main) {
-                            endSession()
-                        }
-                        break
-                    }
+                // Determine phase
+                currentPhase = if (elapsedSeconds <= preparationSeconds) {
+                    "Preparing"
+                } else {
+                    "Sitting"
+                }
 
-                    // Check triggers
-                    val sittingElapsed = elapsedSeconds - preparationSeconds
-                    if (sittingElapsed == 1) {
-                        // Execute START triggers at the beginning of sitting phase
-                        executeStartTriggers()
-                    }
-                    if (sittingElapsed > 0) {
-                        checkTriggers(sittingElapsed)
-                    }
-
-                    // Send tick broadcast
-                    val tickIntent = Intent(ACTION_TICK).apply {
-                        putExtra(EXTRA_REMAINING, remaining.coerceAtLeast(0))
-                        putExtra(EXTRA_ELAPSED, elapsedSeconds)
-                        putExtra(EXTRA_PHASE, currentPhase)
-                        setPackage(packageName)
-                    }
-                    sendBroadcast(tickIntent)
-
-                    lastRemaining = remaining.coerceAtLeast(0)
-                    lastElapsed = elapsedSeconds
-                    lastPhase = currentPhase
-
-                    // Update notification
-                    val notifText = if (isClosedSession) {
-                        "Remaining: ${formatTime(remaining.coerceAtLeast(0))}"
-                    } else {
-                        "Elapsed: ${formatTime(elapsedSeconds)}"
-                    }
+                // Check if session ended
+                if (isClosedSession && remaining <= 0) {
+                    currentPhase = "Ended"
                     withContext(Dispatchers.Main) {
-                        updateNotification(notifText)
+                        endSession()
                     }
+                    break
+                }
+
+                // Check triggers
+                val sittingElapsed = elapsedSeconds - preparationSeconds
+                if (sittingElapsed == 1) {
+                    // Execute START triggers at the beginning of sitting phase
+                    executeStartTriggers()
+                }
+                if (sittingElapsed > 0) {
+                    checkTriggers(sittingElapsed)
+                }
+
+                // Send tick broadcast
+                val tickIntent = Intent(ACTION_TICK).apply {
+                    putExtra(EXTRA_REMAINING, remaining.coerceAtLeast(0))
+                    putExtra(EXTRA_ELAPSED, elapsedSeconds)
+                    putExtra(EXTRA_PHASE, currentPhase)
+                    setPackage(packageName)
+                }
+                sendBroadcast(tickIntent)
+
+                lastRemaining = remaining.coerceAtLeast(0)
+                lastElapsed = elapsedSeconds
+                lastPhase = currentPhase
+
+                // Update notification
+                val notifText = if (isClosedSession) {
+                    "Remaining: ${formatTime(remaining.coerceAtLeast(0))}"
+                } else {
+                    "Elapsed: ${formatTime(elapsedSeconds)}"
+                }
+                withContext(Dispatchers.Main) {
+                    updateNotification(notifText)
                 }
             }
         }
@@ -311,6 +333,7 @@ class TimerService : Service() {
         executeEndTriggers()
         logSession()
         isRunning = false
+        isPaused = false
         lastRemaining = 0
         lastElapsed = 0
         lastPhase = ""
@@ -328,6 +351,7 @@ class TimerService : Service() {
             repeatingTriggerTimers.values.forEach { it.cancel() }
             repeatingTriggerTimers.clear()
             isRunning = false
+            isPaused = false
             lastRemaining = 0
             lastElapsed = 0
             lastPhase = ""
@@ -338,17 +362,40 @@ class TimerService : Service() {
         }
     }
 
+    private fun pauseTimer() {
+        serviceScope.launch {
+            logSegment()
+            timerJob?.cancel()
+            repeatingTriggerTimers.values.forEach { it.cancel() }
+            repeatingTriggerTimers.clear()
+            isPaused = true
+            segmentStartTimeMs = 0
+            sendBroadcast(Intent(ACTION_PAUSED).setPackage(packageName))
+            updateNotification("Paused")
+        }
+    }
+
+    private fun resumeTimer() {
+        segmentStartTimeMs = System.currentTimeMillis()
+        segmentStartElapsed = elapsedSeconds
+        isPaused = false
+        sendBroadcast(Intent(ACTION_RESUMED).setPackage(packageName))
+        runTimerLoop()
+    }
+
     private suspend fun logSession() {
-        if (startTimeMs <= 0) return
+        logSegment()
+    }
+
+    private suspend fun logSegment() {
+        if (segmentStartTimeMs <= 0) return
         val session = db?.sessionDao()?.getSessionById(sessionId) ?: return
 
-        val durationSeconds = if (isClosedSession) {
-            // For closed sessions, use actual elapsed minus prep, capped at sitting time
-            val sittingDone = (elapsedSeconds - preparationSeconds).coerceAtLeast(0)
-            sittingDone.coerceAtMost(totalSittingSeconds)
+        val durationSeconds = if (elapsedSeconds <= preparationSeconds) {
+            0
         } else {
-            // For open sessions, total elapsed minus prep
-            (elapsedSeconds - preparationSeconds).coerceAtLeast(0)
+            val segmentSittingStart = maxOf(segmentStartElapsed, preparationSeconds)
+            elapsedSeconds - segmentSittingStart
         }
 
         if (durationSeconds > 0) {
@@ -356,7 +403,7 @@ class TimerService : Service() {
                 LogEntryEntity(
                     sessionId = sessionId,
                     sessionName = session.name,
-                    startTime = startTimeMs,
+                    startTime = segmentStartTimeMs,
                     durationSeconds = durationSeconds
                 )
             )
