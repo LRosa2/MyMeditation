@@ -122,6 +122,14 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System</string>
 
+    <!-- Silence Phone -->
+    <string name="silence_phone">Silence Phone</string>
+    <string name="restore_phone">Restore Phone</string>
+    <string name="auto_silence">Silence phone during meditation</string>
+    <string name="silence_permission_required">Permission needed to silence notifications. Please enable in settings.</string>
+    <string name="silence_filter_alarms">Alarms Only</string>
+    <string name="silence_filter_priority">Priority Only</string>
+
     <!-- About -->
     <string name="app_author">Luis Rosa</string>
     <string name="support_email">luisribeirosa at gmail.com</string>

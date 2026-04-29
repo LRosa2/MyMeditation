@@ -80,6 +80,16 @@
             app:cornerRadius="24dp" />
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSilence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/silence_phone"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:textColor="@color/meditation_text" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

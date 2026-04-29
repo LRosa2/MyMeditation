@@ -1,5 +1,6 @@
 package com.mysimplemeditation.app.util
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import java.text.SimpleDateFormat
@@ -41,6 +42,14 @@ class SettingsManager(context: Context) {
     var themeMode: String
         get() = prefs.getString("theme_mode", "system") ?: "system"
         set(value) = prefs.edit().putString("theme_mode", value).apply()
+
+    var autoSilencePhone: Boolean
+        get() = prefs.getBoolean("auto_silence_phone", false)
+        set(value) = prefs.edit().putBoolean("auto_silence_phone", value).apply()
+
+    var savedInterruptionFilter: Int
+        get() = prefs.getInt("saved_interruption_filter", NotificationManager.INTERRUPTION_FILTER_UNKNOWN)
+        set(value) = prefs.edit().putInt("saved_interruption_filter", value).apply()
 
     var chainThresholdMinutes: Int
         get() = prefs.getInt("chain_threshold_minutes", 45)

@@ -53,6 +53,7 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.chkRememberVolume.isChecked = settings.rememberVolume
         binding.chkPlayAsAlarm.isChecked = settings.playAsAlarm
+        binding.chkAutoSilence.isChecked = settings.autoSilencePhone
 
         // Time format
         if (settings.is24Hour()) {
@@ -86,6 +87,10 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.chkPlayAsAlarm.setOnCheckedChangeListener { _, isChecked ->
             settings.playAsAlarm = isChecked
+        }
+
+        binding.chkAutoSilence.setOnCheckedChangeListener { _, isChecked ->
+            settings.autoSilencePhone = isChecked
         }
 
         binding.btnConfigureSound.setOnClickListener { showSoundConfigDialog() }
