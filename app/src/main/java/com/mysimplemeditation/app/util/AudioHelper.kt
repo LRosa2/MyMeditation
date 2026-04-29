@@ -5,6 +5,8 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
+import android.os.Looper
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -12,6 +14,7 @@ import android.util.Log
 import android.widget.Toast
 import com.mysimplemeditation.app.R
 import java.io.File
+import android.os.*
 
 object AudioHelper {
 
@@ -141,45 +144,44 @@ object AudioHelper {
         gapMs: Int = 1000,
         onAllComplete: (() -> Unit)? = null
     ) {
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
+        val vibrator =
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
 
-        if (!vibrator.hasVibrator()) {
-            Log.w("AudioHelper", "playVibration: device has no vibrator")
-            Toast.makeText(context, "No vibrator available on this device", Toast.LENGTH_SHORT).show()
-            onAllComplete?.invoke()
-            return
-        }
+        if (!vibrator.hasVibrator()) return
 
         Log.d("AudioHelper", "playVibration: duration=$durationMs, exec=$executions, gap=$gapMs")
         Toast.makeText(context, "Vibrating...", Toast.LENGTH_SHORT).show()
 
-        Thread {
-            for (i in 1..executions) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(
-                        VibrationEffect.createOneShot(
-                            durationMs.toLong(),
-                            255
-                        )
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(durationMs.toLong())
-                }
-                val remaining = executions - i
-                if (remaining > 0) {
-                    Thread.sleep(gapMs.toLong())
-                }
+        // 1. Define the Pattern
+        // Waveform timings: [delayBeforeStart, duration1, gap1, duration2, gap2...]
+        val timings = mutableListOf<Long>(0) // Start immediately
+        val amplitudes = mutableListOf<Int>(0) // Initial amplitude (off)
+
+        for (i in 1..executions) {
+            timings.add(durationMs.toLong())
+            amplitudes.add(255) // Max strength
+
+            if (i < executions) {
+                timings.add(gapMs.toLong())
+                amplitudes.add(0) // Pause
             }
+        }
+
+
+        // Simplest version that bypasses "Touch Feedback" settings
+        val attributes = VibrationAttributes.Builder()
+            .setUsage(VibrationAttributes.USAGE_ALARM)
+            .build()
+
+        val effect = VibrationEffect.createWaveform(timings.toLongArray(), amplitudes.toIntArray(), -1)
+        vibrator.vibrate(effect, attributes)
+
+        // Optional: Use a simple postDelayed for your callback
+        Handler(Looper.getMainLooper()).postDelayed({
             onAllComplete?.invoke()
-        }.start()
+        }, timings.sum())
     }
+
 
     fun setStreamVolume(context: Context, streamType: Int, volume: Int) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
