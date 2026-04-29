@@ -20,6 +20,7 @@ import com.mysimplemeditation.app.data.entities.TriggerEntity.Companion.TIME_STA
 import com.mysimplemeditation.app.ui.main.MainActivity
 import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.SettingsManager
+import com.mysimplemeditation.app.util.SilenceHelper
 import kotlinx.coroutines.*
 import java.util.Calendar
 
@@ -160,6 +161,11 @@ class TimerService : Service() {
             sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
             isRunning = true
             isPaused = false
+
+            // Auto-silence phone if setting enabled
+            if (settings.autoSilencePhone) {
+                SilenceHelper.silencePhone(this@TimerService)
+            }
 
             runTimerLoop()
         }
@@ -341,6 +347,11 @@ class TimerService : Service() {
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+
+        // Auto-restore phone if setting enabled
+        if (settings.autoSilencePhone) {
+            SilenceHelper.restorePhone(this@TimerService)
+        }
     }
 
     private fun stopTimer() {
@@ -359,6 +370,11 @@ class TimerService : Service() {
             releaseWakeLock()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
+
+            // Auto-restore phone if setting enabled
+            if (settings.autoSilencePhone) {
+                SilenceHelper.restorePhone(this@TimerService)
+            }
         }
     }
 

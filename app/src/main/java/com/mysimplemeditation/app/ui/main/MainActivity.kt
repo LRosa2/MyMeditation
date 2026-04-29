@@ -35,6 +35,7 @@ import com.mysimplemeditation.app.ui.settings.SettingsActivity
 import com.mysimplemeditation.app.ui.stats.StatisticsActivity
 import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.SettingsManager
+import com.mysimplemeditation.app.util.SilenceHelper
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -151,6 +152,8 @@ class MainActivity : AppCompatActivity() {
         if (settings.rememberVolume) {
             AudioHelper.restoreVolume(this, settings)
         }
+
+        updateSilenceButtonState()
     }
 
     override fun onPause() {
@@ -294,6 +297,38 @@ class MainActivity : AppCompatActivity() {
                 action = TimerService.ACTION_STOP
             }
             startService(intent)
+        }
+
+        binding.btnSilence.setOnClickListener {
+            toggleSilence()
+        }
+    }
+
+    private fun toggleSilence() {
+        if (!SilenceHelper.hasNotificationPolicyAccess(this)) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.silence_phone)
+                .setMessage(R.string.silence_permission_required)
+                .setPositiveButton("Open Settings") { _, _ ->
+                    SilenceHelper.requestNotificationPolicyAccess(this)
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+            return
+        }
+        if (SilenceHelper.isSilenced(this)) {
+            SilenceHelper.restorePhone(this)
+        } else {
+            SilenceHelper.silencePhone(this)
+        }
+        updateSilenceButtonState()
+    }
+
+    private fun updateSilenceButtonState() {
+        if (SilenceHelper.isSilenced(this)) {
+            binding.btnSilence.text = getString(R.string.restore_phone)
+        } else {
+            binding.btnSilence.text = getString(R.string.silence_phone)
         }
     }
 
