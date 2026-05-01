@@ -51,13 +51,8 @@ object AudioHelper {
                         android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.singing_bell}"))
                     mp.setVolume(volume / 100f, volume / 100f)
                     mp.prepare()
+                    mp.setOnCompletionListener { it.release() }
                     mp.start()
-
-                    // Wait for playback to finish
-                    while (mp.isPlaying) {
-                        Thread.sleep(100)
-                    }
-                    mp.release()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     try { mp.release() } catch (_: Exception) {}
