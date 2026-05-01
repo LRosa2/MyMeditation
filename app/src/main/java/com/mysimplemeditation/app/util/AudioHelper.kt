@@ -163,13 +163,15 @@ object AudioHelper {
         }
 
 
-        // Simplest version that bypasses "Touch Feedback" settings
-        val attributes = VibrationAttributes.Builder()
-            .setUsage(VibrationAttributes.USAGE_ALARM)
-            .build()
-
         val effect = VibrationEffect.createWaveform(timings.toLongArray(), amplitudes.toIntArray(), -1)
-        vibrator.vibrate(effect, attributes)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val attributes = VibrationAttributes.Builder()
+                .setUsage(VibrationAttributes.USAGE_ALARM)
+                .build()
+            vibrator.vibrate(effect, attributes)
+        } else {
+            vibrator.vibrate(effect)
+        }
 
         // Optional: Use a simple postDelayed for your callback
         Handler(Looper.getMainLooper()).postDelayed({
