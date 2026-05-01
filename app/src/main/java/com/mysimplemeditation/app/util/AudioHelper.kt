@@ -8,10 +8,10 @@ import android.os.Build
 import android.os.Looper
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.mysimplemeditation.app.R
 import java.io.File
 import android.os.*
@@ -48,7 +48,7 @@ object AudioHelper {
                     }
 
                     mp.setDataSource(context.applicationContext,
-                        android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.singing_bell}"))
+                        "android.resource://${context.packageName}/${R.raw.singing_bell}".toUri())
                     mp.setVolume(volume / 100f, volume / 100f)
                     mp.prepare()
                     mp.setOnCompletionListener { it.release() }
@@ -102,7 +102,7 @@ object AudioHelper {
                         mp.setDataSource(path)
                     } else if (path.startsWith("content://")) {
                         // Content URI from SAF file picker
-                        val uri = android.net.Uri.parse(path)
+                        val uri = path.toUri()
                         mp.setDataSource(context, uri)
                     } else {
                         // Try as asset or resource URI
@@ -185,13 +185,6 @@ object AudioHelper {
         val max = audioManager.getStreamMaxVolume(streamType)
         val scaled = (volume / 100f * max).toInt()
         audioManager.setStreamVolume(streamType, scaled, 0)
-    }
-
-    fun getStreamVolume(context: Context, streamType: Int): Int {
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val current = audioManager.getStreamVolume(streamType)
-        val max = audioManager.getStreamMaxVolume(streamType)
-        return if (max > 0) (current.toFloat() / max * 100).toInt() else 80
     }
 
     fun saveCurrentVolume(context: Context, settings: SettingsManager) {
