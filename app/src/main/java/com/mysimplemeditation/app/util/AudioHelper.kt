@@ -10,7 +10,6 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import android.util.Log
-import android.widget.Toast
 import androidx.core.net.toUri
 import com.mysimplemeditation.app.R
 import java.io.File
@@ -145,7 +144,6 @@ object AudioHelper {
         if (!vibrator.hasVibrator()) return
 
         Log.d("AudioHelper", "playVibration: duration=$durationMs, exec=$executions, gap=$gapMs")
-        Toast.makeText(context, "Vibrating...", Toast.LENGTH_SHORT).show()
 
         // 1. Define the Pattern
         // Waveform timings: [delayBeforeStart, duration1, gap1, duration2, gap2...]
