@@ -114,6 +114,10 @@
     <string name="add">Add</string>
     <string name="trigger_start_label">Start</string>
     <string name="trigger_end_label">End</string>
+    <string name="timer_default">00:00:00</string>
+    <string name="session_info_format">%1$s | %2$s%3$s</string>
+    <string name="email">Email</string>
+    <string name="send_email">Send email</string>
 
     <!-- Chains -->
     <string name="no_chains">No qualifying days found. Complete sittings to build chains!</string>

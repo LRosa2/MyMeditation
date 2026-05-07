@@ -1,12 +1,14 @@
 package com.mysimplemeditation.app.ui.main
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.Uri
 import android.content.pm.PackageManager
+import androidx.core.net.toUri
+import java.util.Locale
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -67,14 +69,14 @@ class MainActivity : AppCompatActivity() {
                     isTimerRunning = false
                     isTimerPaused = false
                     updateButtonStates()
-                    binding.txtTimer.text = "00:00:00"
-                    binding.txtPhase.text = ""
+                    binding.txtTimer.text = getString(R.string.timer_default)
+                    binding.txtPhase.text = null
                 }
                 TimerService.ACTION_ENDED -> {
                     isTimerRunning = false
                     isTimerPaused = false
                     updateButtonStates()
-                    binding.txtTimer.text = "00:00:00"
+                    binding.txtTimer.text = getString(R.string.timer_default)
                     binding.txtPhase.text = getString(R.string.session_ended)
                 }
                 TimerService.ACTION_PAUSED -> {
@@ -122,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("InlinedApi")
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter().apply {
@@ -132,7 +135,7 @@ class MainActivity : AppCompatActivity() {
             addAction(TimerService.ACTION_PAUSED)
             addAction(TimerService.ACTION_RESUMED)
         }
-        registerReceiver(timerReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        registerReceiver(timerReceiver, filter, RECEIVER_NOT_EXPORTED)
 
         // Sync with service state in case broadcasts were missed while screen was off
         if (TimerService.isRunning) {
@@ -145,7 +148,7 @@ class MainActivity : AppCompatActivity() {
             isTimerRunning = false
             isTimerPaused = false
             updateButtonStates()
-            binding.txtTimer.text = "00:00:00"
+            binding.txtTimer.text = getString(R.string.timer_default)
             binding.txtPhase.text = getString(R.string.session_ended)
         }
 
@@ -374,7 +377,7 @@ class MainActivity : AppCompatActivity() {
         val sitting = if (session.type == "CLOSED") {
             " | ${session.sittingMinutes}m ${session.sittingSeconds}s sitting"
         } else ""
-        binding.txtSessionInfo.text = "$type | $prep$sitting"
+        binding.txtSessionInfo.text = getString(R.string.session_info_format, type, prep, sitting)
     }
 
     private fun updateTimerDisplay(remaining: Int, elapsed: Int, phase: String) {
@@ -410,7 +413,7 @@ class MainActivity : AppCompatActivity() {
         val h = totalSeconds / 3600
         val m = (totalSeconds % 3600) / 60
         val s = totalSeconds % 60
-        return String.format("%02d:%02d:%02d", h, m, s)
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
     }
 
     private fun showAboutDialog() {
@@ -427,11 +430,11 @@ class MainActivity : AppCompatActivity() {
             .setTitle(getString(R.string.app_name))
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
-            .setNeutralButton("Email") { _, _ ->
+            .setNeutralButton(getString(R.string.email)) { _, _ ->
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:$email")
+                    data = "mailto:$email".toUri()
                 }
-                startActivity(Intent.createChooser(intent, "Send email"))
+                startActivity(Intent.createChooser(intent, getString(R.string.send_email)))
             }
             .show()
 
@@ -442,7 +445,7 @@ class MainActivity : AppCompatActivity() {
                 val emailStart = toString().indexOf(email)
                 if (emailStart >= 0) {
                     setSpan(
-                        URLSpan("mailto:$email"),
+                        URLSpan("mailto:$email".toUri().toString()),
                         emailStart,
                         emailStart + email.length,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
