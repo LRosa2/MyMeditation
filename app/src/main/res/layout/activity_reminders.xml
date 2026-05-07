@@ -19,9 +19,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="gone"
-        app:cardBackgroundColor="@color/meditation_card_bg"
+        app:cardBackgroundColor="@color/meditation_bg"
         app:contentPadding="12dp"
-        app:strokeColor="@color/meditation_accent"
+        app:strokeColor="@color/meditation_primary"
         app:strokeWidth="1dp">
 
         <LinearLayout
