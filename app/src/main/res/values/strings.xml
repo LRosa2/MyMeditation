@@ -54,6 +54,8 @@
     <string name="reminder_enabled">Enabled</string>
     <string name="no_reminders">No reminders configured</string>
     <string name="reminder_notification_title">Meditation Reminder</string>
+    <string name="battery_optimization_warning">Battery optimization may prevent reminders from working reliably. Consider disabling it for this app.</string>
+    <string name="disable_battery_optimization">Disable Battery Optimization</string>
 
     <!-- Settings -->
     <string name="remember_volume">Remember and restore volume</string>

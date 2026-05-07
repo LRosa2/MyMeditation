@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +66,10 @@ class RemindersActivity : AppCompatActivity() {
             startActivity(Intent(this, ReminderEditActivity::class.java))
         }
 
+        binding.btnDisableBatteryOptimization.setOnClickListener {
+            openBatteryOptimizationSettings()
+        }
+
         loadReminders()
     }
 
@@ -92,6 +98,37 @@ class RemindersActivity : AppCompatActivity() {
             val reminders = db.reminderDao().getAllRemindersList()
             adapter.setItems(reminders)
             binding.txtEmptyReminders.visibility = if (reminders.isEmpty()) View.VISIBLE else View.GONE
+            updateBatteryWarningVisibility()
+        }
+    }
+
+    private fun updateBatteryWarningVisibility() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val isIgnoring = powerManager.isIgnoringBatteryOptimizations(packageName)
+            binding.cardBatteryWarning.visibility = if (isIgnoring) View.GONE else View.VISIBLE
+        } else {
+            binding.cardBatteryWarning.visibility = View.GONE
+        }
+    }
+
+    private fun openBatteryOptimizationSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    // Fallback to general battery optimization settings
+                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                }
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                } catch (_: Exception) {}
+            }
         }
     }
 

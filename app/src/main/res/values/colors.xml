@@ -12,4 +12,5 @@
     <color name="meditation_accent">#FF8BC34A</color>
     <color name="meditation_bg">#FFF5F5DC</color>
     <color name="meditation_text">#FF2E4A3E</color>
+    <color name="meditation_card_bg">#FFFFF8E1</color>
 </resources>
