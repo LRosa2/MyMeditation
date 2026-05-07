@@ -27,6 +27,11 @@ class ReminderReceiver : BroadcastReceiver() {
         private const val EXTRA_REMINDER_ID = "reminder_id"
 
         fun schedule(context: Context, reminder: ReminderEntity) {
+            if (!reminder.enabled) {
+                cancel(context, reminder)
+                return
+            }
+
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             val intent = Intent(context, ReminderReceiver::class.java).apply {
@@ -52,40 +57,45 @@ class ReminderReceiver : BroadcastReceiver() {
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
 
+            val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
+
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
-                    } else {
-                        // Fallback to inexact alarm
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            calendar.timeInMillis,
-                            pendingIntent
-                        )
-                    }
-                } else {
+                if (canExact) {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
                     )
+                    Log.d(TAG, "Scheduled exact alarm for reminder ${reminder.id} at ${calendar.time}")
+                } else {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                    Log.d(TAG, "Scheduled inexact alarm for reminder ${reminder.id} at ${calendar.time} (no exact permission)")
                 }
             } catch (e: SecurityException) {
-                Log.e(TAG, "Cannot schedule exact alarm", e)
+                Log.e(TAG, "Cannot schedule exact alarm for reminder ${reminder.id}, falling back to inexact", e)
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
                     pendingIntent
                 )
             }
+        }
 
-            // Reschedule for next day (repeating daily)
-            // We'll reschedule in onReceive after the alarm fires
+        suspend fun rescheduleAll(context: Context) {
+            val db = AppDatabase.getInstance(context)
+            val reminders = db.reminderDao().getEnabledReminders()
+            Log.d(TAG, "Rescheduling ${reminders.size} enabled reminders")
+            for (reminder in reminders) {
+                schedule(context, reminder)
+            }
         }
 
         fun testNotification(context: Context, message: String) {
@@ -114,6 +124,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            Log.d(TAG, "Cancelled alarm for reminder ${reminder.id}")
         }
     }
 

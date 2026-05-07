@@ -33,6 +33,7 @@ import com.mysimplemeditation.app.ui.reminders.RemindersActivity
 import com.mysimplemeditation.app.ui.sessions.SessionsActivity
 import com.mysimplemeditation.app.ui.settings.SettingsActivity
 import com.mysimplemeditation.app.ui.stats.StatisticsActivity
+import com.mysimplemeditation.app.receiver.ReminderReceiver
 import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.SettingsManager
 import com.mysimplemeditation.app.util.SilenceHelper
@@ -107,6 +108,10 @@ class MainActivity : AppCompatActivity() {
         db = AppDatabase.getInstance(this)
 
         requestNotificationPermission()
+
+        lifecycleScope.launch {
+            ReminderReceiver.rescheduleAll(this@MainActivity)
+        }
 
         setupVolumeSlider()
         setupTriggerModeSpinner()
