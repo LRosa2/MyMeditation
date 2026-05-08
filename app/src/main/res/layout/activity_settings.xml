@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -34,14 +33,14 @@
         android:id="@+id/chkHighReliabilityMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="High Reliability Mode"
+        android:text="@string/high_reliability_mode"
         android:textColor="@color/meditation_text"
         android:layout_marginBottom="4dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Prevents Android from silencing bells or stopping the timer during long sessions. Recommended for sessions over 15 minutes."
+        android:text="@string/high_reliability_mode_description"
         android:textColor="@color/meditation_text"
         android:textSize="12sp"
         android:layout_marginBottom="16dp" />
@@ -122,7 +121,7 @@
         android:id="@+id/btnConfigureSound"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Configure Sound"
+        android:text="@string/configure_sound"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_marginBottom="8dp" />
 
@@ -130,7 +129,7 @@
         android:id="@+id/btnConfigureVibration"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Configure Vibration"
+        android:text="@string/configure_vibration"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_marginBottom="16dp" />
 

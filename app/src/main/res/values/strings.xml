@@ -136,6 +136,13 @@
     <string name="silence_filter_alarms">Alarms Only</string>
     <string name="silence_filter_priority">Priority Only</string>
 
+    <!-- High Reliability Mode -->
+    <string name="high_reliability_mode">High Reliability Mode</string>
+    <string name="high_reliability_mode_description">Prevents Android from silencing bells or stopping the timer during long sessions. Recommended for sessions over 15 minutes.</string>
+    <string name="configure_sound">Configure Sound</string>
+    <string name="configure_vibration">Configure Vibration</string>
+    <string name="backup_db_default_path">/storage/emulated/0/Documents/MyMeditation/mymeditation_backup.db</string>
+
     <!-- About -->
     <string name="app_author">Luis Rosa</string>
     <string name="support_email">luisribeirosa at gmail.com</string>

@@ -5,9 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.text.Editable
 import androidx.activity.result.contract.ActivityResultContracts
-import android.text.TextWatcher
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.SeekBar
@@ -16,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.mysimplemeditation.app.R
-import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.databinding.ActivitySettingsBinding
+import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.BatteryOptimizationHelper
 import com.mysimplemeditation.app.util.DatabaseExporter
 import com.mysimplemeditation.app.util.SettingsManager
@@ -48,7 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        title = getString(com.mysimplemeditation.app.R.string.menu_settings)
+        title = getString(R.string.menu_settings)
 
         settings = SettingsManager(this)
 
@@ -113,18 +111,18 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showSoundConfigDialog() {
-        val dialogView = layoutInflater.inflate(com.mysimplemeditation.app.R.layout.dialog_general_sound, null)
-        val spinnerType = dialogView.findViewById<android.widget.Spinner>(com.mysimplemeditation.app.R.id.spinnerGeneralSoundType)
-        val layoutMp3Path = dialogView.findViewById<View>(com.mysimplemeditation.app.R.id.layoutGeneralMp3Path)
-        val editMp3Path = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralMp3Path)
-        val btnBrowse = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnGeneralBrowseMp3)
-        val seekBarVolume = dialogView.findViewById<SeekBar>(com.mysimplemeditation.app.R.id.seekBarGeneralVolume)
-        val editExec = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralSoundExecutions)
-        val editGap = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(com.mysimplemeditation.app.R.id.editGeneralSoundGap)
-        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnTestGeneralSound)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_general_sound, null)
+        val spinnerType = dialogView.findViewById<android.widget.Spinner>(R.id.spinnerGeneralSoundType)
+        val layoutMp3Path = dialogView.findViewById<View>(R.id.layoutGeneralMp3Path)
+        val editMp3Path = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralMp3Path)
+        val btnBrowse = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnGeneralBrowseMp3)
+        val seekBarVolume = dialogView.findViewById<SeekBar>(R.id.seekBarGeneralVolume)
+        val editExec = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralSoundExecutions)
+        val editGap = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editGeneralSoundGap)
+        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnTestGeneralSound)
 
-        val typeAdapter = ArrayAdapter(this, com.mysimplemeditation.app.R.layout.spinner_item_dark, listOf("Bell", "MP3"))
-        typeAdapter.setDropDownViewResource(com.mysimplemeditation.app.R.layout.spinner_dropdown_item_dark)
+        val typeAdapter = ArrayAdapter(this, R.layout.spinner_item_dark, listOf("Bell", "MP3"))
+        typeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark)
         spinnerType.adapter = typeAdapter
         spinnerType.setSelection(if (settings.generalSoundType == "BELL") 0 else 1)
 
@@ -151,35 +149,35 @@ class SettingsActivity : AppCompatActivity() {
             val exec = editExec.text.toString().toIntOrNull() ?: 1
             val gap = editGap.text.toString().toIntOrNull() ?: 500
             if (type == "BELL") {
-                com.mysimplemeditation.app.util.AudioHelper.playBell(this, vol, settings.playAsAlarm, exec, gap)
+                AudioHelper.playBell(this, vol, settings.playAsAlarm, exec, gap)
             } else {
                 val path = editMp3Path.text.toString()
                 if (path.isNotBlank()) {
-                    com.mysimplemeditation.app.util.AudioHelper.playMp3(this, path, vol, settings.playAsAlarm, exec, gap)
+                    AudioHelper.playMp3(this, path, vol, settings.playAsAlarm, exec, gap)
                 }
             }
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Configure Sound")
+            .setTitle(getString(R.string.configure_sound))
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 settings.generalSoundType = if (spinnerType.selectedItemPosition == 0) "BELL" else "MP3"
                 settings.generalSoundMp3Path = editMp3Path.text.toString()
                 settings.generalSoundVolume = seekBarVolume.progress
                 settings.generalSoundExecutions = editExec.text.toString().toIntOrNull() ?: 1
                 settings.generalSoundGapMs = editGap.text.toString().toIntOrNull() ?: 500
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
     private fun showVibrationConfigDialog() {
-        val dialogView = layoutInflater.inflate(com.mysimplemeditation.app.R.layout.dialog_general_vibration, null)
-        val editExec = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibExecutions)
-        val editDuration = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibDuration)
-        val editGap = dialogView.findViewById<EditText>(com.mysimplemeditation.app.R.id.editGeneralVibGap)
-        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(com.mysimplemeditation.app.R.id.btnTestGeneralVibration)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_general_vibration, null)
+        val editExec = dialogView.findViewById<EditText>(R.id.editGeneralVibExecutions)
+        val editDuration = dialogView.findViewById<EditText>(R.id.editGeneralVibDuration)
+        val editGap = dialogView.findViewById<EditText>(R.id.editGeneralVibGap)
+        val btnTest = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnTestGeneralVibration)
 
         editExec.setText(settings.vibrationExecutions.toString())
         editDuration.setText(settings.vibrationDurationMs.toString())
@@ -189,18 +187,18 @@ class SettingsActivity : AppCompatActivity() {
             val exec = editExec.text.toString().toIntOrNull() ?: 2
             val dur = editDuration.text.toString().toIntOrNull() ?: 500
             val gap = editGap.text.toString().toIntOrNull() ?: 1000
-            com.mysimplemeditation.app.util.AudioHelper.playVibration(this, dur, exec, gap)
+            AudioHelper.playVibration(this, dur, exec, gap)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Configure Vibration")
+            .setTitle(getString(R.string.configure_vibration))
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 settings.vibrationExecutions = editExec.text.toString().toIntOrNull() ?: 2
                 settings.vibrationDurationMs = editDuration.text.toString().toIntOrNull() ?: 500
                 settings.vibrationGapMs = editGap.text.toString().toIntOrNull() ?: 1000
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -223,13 +221,13 @@ class SettingsActivity : AppCompatActivity() {
             result.onSuccess { path ->
                 Toast.makeText(
                     this@SettingsActivity,
-                    "${getString(com.mysimplemeditation.app.R.string.export_success)}: $path",
+                    "${getString(R.string.export_success)}: $path",
                     Toast.LENGTH_LONG
                 ).show()
             }.onFailure { e ->
                 Toast.makeText(
                     this@SettingsActivity,
-                    "${getString(com.mysimplemeditation.app.R.string.export_fail)}: ${e.message}",
+                    "${getString(R.string.export_fail)}: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -240,14 +238,14 @@ class SettingsActivity : AppCompatActivity() {
         // Simple approach: show a dialog asking for the path
         // In a production app, you'd use SAF (Storage Access Framework)
         val input = android.widget.EditText(this).apply {
-            hint = "/storage/emulated/0/Documents/MyMeditation/mymeditation_backup.db"
-            setText("/storage/emulated/0/Documents/MyMeditation/mymeditation_backup.db")
+            hint = getString(R.string.backup_db_default_path)
+            setText(getString(R.string.backup_db_default_path))
         }
 
         AlertDialog.Builder(this)
-            .setTitle(getString(com.mysimplemeditation.app.R.string.import_database))
+            .setTitle(getString(R.string.import_database))
             .setView(input)
-            .setPositiveButton("Import") { _, _ ->
+            .setPositiveButton(getString(R.string.add)) { _, _ ->
                 val path = input.text.toString().trim()
                 if (path.isNotEmpty()) {
                     lifecycleScope.launch {
@@ -255,20 +253,20 @@ class SettingsActivity : AppCompatActivity() {
                         result.onSuccess {
                             Toast.makeText(
                                 this@SettingsActivity,
-                                getString(com.mysimplemeditation.app.R.string.import_success),
+                                getString(R.string.import_success),
                                 Toast.LENGTH_LONG
                             ).show()
                         }.onFailure { e ->
                             Toast.makeText(
                                 this@SettingsActivity,
-                                "${getString(com.mysimplemeditation.app.R.string.import_fail)}: ${e.message}",
+                                "${getString(R.string.import_fail)}: ${e.message}",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
                     }
                 }
             }
-            .setNegativeButton(getString(com.mysimplemeditation.app.R.string.cancel), null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 }
