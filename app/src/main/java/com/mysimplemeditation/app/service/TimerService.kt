@@ -21,6 +21,7 @@ import com.mysimplemeditation.app.ui.main.MainActivity
 import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.SettingsManager
 import com.mysimplemeditation.app.util.SilenceHelper
+import android.content.SharedPreferences
 import kotlinx.coroutines.*
 import java.util.Calendar
 
@@ -88,11 +89,15 @@ class TimerService : Service() {
     private var segmentStartTimeMs: Long = 0L
     private var segmentStartElapsed: Int = 0
     private var wakeLock: PowerManager.WakeLock? = null
+    private lateinit var timerPrefs: SharedPreferences
+    private var totalPauseDurationMs: Long = 0L
+    private var pauseStartMs: Long = 0L
 
     override fun onCreate() {
         super.onCreate()
         db = AppDatabase.getInstance(this)
         settings = SettingsManager(this)
+        timerPrefs = getSharedPreferences("timer_state", Context.MODE_PRIVATE)
         createNotificationChannel()
     }
 
@@ -101,11 +106,20 @@ class TimerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
-                volume = intent.getIntExtra(EXTRA_VOLUME, 80)
-                useAlarm = intent.getBooleanExtra(EXTRA_USE_ALARM, false)
-                globalMode = intent.getStringExtra(EXTRA_GLOBAL_MODE) ?: "default"
-                startTimer()
+                val intentSessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
+                val persistedSessionId = timerPrefs.getLong("session_id", -1L)
+                if (timerPrefs.getBoolean("active", false) && persistedSessionId == intentSessionId && persistedSessionId != -1L) {
+                    recoverTimer(intent)
+                } else {
+                    if (persistedSessionId != -1L) {
+                        clearTimerState()
+                    }
+                    sessionId = intentSessionId
+                    volume = intent.getIntExtra(EXTRA_VOLUME, 80)
+                    useAlarm = intent.getBooleanExtra(EXTRA_USE_ALARM, false)
+                    globalMode = intent.getStringExtra(EXTRA_GLOBAL_MODE) ?: "default"
+                    startTimer()
+                }
             }
             ACTION_STOP -> {
                 stopTimer()
@@ -117,7 +131,7 @@ class TimerService : Service() {
                 resumeTimer()
             }
         }
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
@@ -167,6 +181,7 @@ class TimerService : Service() {
                 SilenceHelper.silencePhone(this@TimerService)
             }
 
+            saveTimerState()
             runTimerLoop()
         }
     }
@@ -175,7 +190,10 @@ class TimerService : Service() {
         timerJob = serviceScope.launch(Dispatchers.IO) {
             while (isActive) {
                 delay(1000)
-                elapsedSeconds++
+
+                // Wall-clock synchronized elapsed time
+                val rawElapsedMs = System.currentTimeMillis() - startTimeMs
+                elapsedSeconds = ((rawElapsedMs - totalPauseDurationMs) / 1000).toInt().coerceAtLeast(0)
 
                 val totalSessionSeconds = preparationSeconds + totalSittingSeconds
                 val remaining = if (isClosedSession) {
@@ -200,7 +218,7 @@ class TimerService : Service() {
 
                 // Check triggers
                 val sittingElapsed = elapsedSeconds - preparationSeconds
-                if (sittingElapsed == 1) {
+                if (sittingElapsed >= 1) {
                     // Execute START triggers at the beginning of sitting phase
                     executeStartTriggers()
                 }
@@ -243,6 +261,7 @@ class TimerService : Service() {
 
             if (sittingElapsed >= trigger.startTimeSeconds && trigger.id !in firedTriggers) {
                 firedTriggers.add(trigger.id)
+                saveTimerState()
                 executeTrigger(trigger)
 
                 // Set up repeating if needed
@@ -266,6 +285,7 @@ class TimerService : Service() {
         for (trigger in triggers) {
             if (trigger.startTimeSeconds == TIME_START && trigger.id !in firedTriggers) {
                 firedTriggers.add(trigger.id)
+                saveTimerState()
                 executeTrigger(trigger)
             }
         }
@@ -352,6 +372,7 @@ class TimerService : Service() {
         if (settings.autoSilencePhone) {
             SilenceHelper.restorePhone(this@TimerService)
         }
+        clearTimerState()
     }
 
     private fun stopTimer() {
@@ -375,6 +396,7 @@ class TimerService : Service() {
             if (settings.autoSilencePhone) {
                 SilenceHelper.restorePhone(this@TimerService)
             }
+            clearTimerState()
         }
     }
 
@@ -385,16 +407,23 @@ class TimerService : Service() {
             repeatingTriggerTimers.values.forEach { it.cancel() }
             repeatingTriggerTimers.clear()
             isPaused = true
+            pauseStartMs = System.currentTimeMillis()
             segmentStartTimeMs = 0
+            saveTimerState()
             sendBroadcast(Intent(ACTION_PAUSED).setPackage(packageName))
             updateNotification("Paused")
         }
     }
 
     private fun resumeTimer() {
+        if (pauseStartMs > 0) {
+            totalPauseDurationMs += (System.currentTimeMillis() - pauseStartMs)
+            pauseStartMs = 0
+        }
+        isPaused = false
         segmentStartTimeMs = System.currentTimeMillis()
         segmentStartElapsed = elapsedSeconds
-        isPaused = false
+        saveTimerState()
         sendBroadcast(Intent(ACTION_RESUMED).setPackage(packageName))
         runTimerLoop()
     }
@@ -482,6 +511,76 @@ class TimerService : Service() {
     private fun updateNotification(text: String) {
         val manager = getSystemService(NotificationManager::class.java)
         manager.notify(NOTIFICATION_ID, buildNotification(text))
+    }
+
+    private fun saveTimerState() {
+        timerPrefs.edit().apply {
+            putBoolean("active", true)
+            putLong("session_id", sessionId)
+            putInt("volume", volume)
+            putBoolean("use_alarm", useAlarm)
+            putString("global_mode", globalMode)
+            putLong("start_time_ms", startTimeMs)
+            putInt("preparation_seconds", preparationSeconds)
+            putInt("total_sitting_seconds", if (isClosedSession && totalSittingSeconds != Int.MAX_VALUE) totalSittingSeconds else -1)
+            putBoolean("is_closed_session", isClosedSession)
+            putLong("total_pause_ms", totalPauseDurationMs)
+            putBoolean("is_paused", isPaused)
+            putString("fired_triggers", firedTriggers.joinToString(","))
+            apply()
+        }
+    }
+
+    private fun clearTimerState() {
+        timerPrefs.edit().apply {
+            putBoolean("active", false)
+            putLong("session_id", -1L)
+            apply()
+        }
+    }
+
+    private fun recoverTimer(intent: Intent) {
+        serviceScope.launch {
+            sessionId = timerPrefs.getLong("session_id", -1)
+            volume = intent.getIntExtra(EXTRA_VOLUME, timerPrefs.getInt("volume", 80))
+            useAlarm = intent.getBooleanExtra(EXTRA_USE_ALARM, timerPrefs.getBoolean("use_alarm", false))
+            globalMode = intent.getStringExtra(EXTRA_GLOBAL_MODE) ?: timerPrefs.getString("global_mode", "default") ?: "default"
+
+            val session = db?.sessionDao()?.getSessionById(sessionId) ?: run {
+                clearTimerState()
+                return@launch
+            }
+            isClosedSession = session.type == "CLOSED"
+            preparationSeconds = timerPrefs.getInt("preparation_seconds", session.preparationMinutes * 60 + session.preparationSeconds)
+            val savedSitting = timerPrefs.getInt("total_sitting_seconds", -1)
+            totalSittingSeconds = if (savedSitting >= 0) savedSitting else if (isClosedSession) {
+                session.sittingMinutes * 60 + session.sittingSeconds
+            } else Int.MAX_VALUE
+
+            triggers = db?.sessionDao()?.getTriggersForSessionSync(sessionId) ?: emptyList()
+            firedTriggers.clear()
+            val firedStr = timerPrefs.getString("fired_triggers", "") ?: ""
+            if (firedStr.isNotEmpty()) {
+                firedTriggers.addAll(firedStr.split(",").mapNotNull { it.toLongOrNull() })
+            }
+            repeatingTriggerTimers.clear()
+
+            startTimeMs = timerPrefs.getLong("start_time_ms", System.currentTimeMillis())
+            totalPauseDurationMs = timerPrefs.getLong("total_pause_ms", 0L)
+            isPaused = timerPrefs.getBoolean("is_paused", false)
+
+            acquireWakeLock()
+            startForeground(NOTIFICATION_ID, buildNotification("Recovering meditation..."))
+
+            sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
+            isRunning = true
+
+            if (!isPaused) {
+                runTimerLoop()
+            } else {
+                updateNotification("Paused")
+            }
+        }
     }
 
     private fun formatTime(totalSeconds: Int): String {
