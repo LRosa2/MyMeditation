@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.core.content.edit
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.data.entities.LogEntryEntity
 import com.mysimplemeditation.app.data.entities.TriggerEntity
@@ -127,7 +128,7 @@ class TriggerAlarmReceiver : BroadcastReceiver() {
         }
 
         firedTriggers.add(triggerId)
-        timerPrefs.edit().putString("fired_triggers", firedTriggers.joinToString(",")).apply()
+        timerPrefs.edit { putString("fired_triggers", firedTriggers.joinToString(",")) }
 
         val globalMode = timerPrefs.getString("global_mode", "default") ?: "default"
         val useAlarm = timerPrefs.getBoolean("use_alarm", false)
@@ -220,10 +221,9 @@ class TriggerAlarmReceiver : BroadcastReceiver() {
             )
         }
 
-        timerPrefs.edit().apply {
+        timerPrefs.edit {
             putBoolean("active", false)
             putLong("session_id", -1L)
-            apply()
         }
 
         val endedIntent = Intent(TimerService.ACTION_ENDED).apply {

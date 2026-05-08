@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.SeekBar
@@ -126,11 +127,11 @@ class SettingsActivity : AppCompatActivity() {
         spinnerType.adapter = typeAdapter
         spinnerType.setSelection(if (settings.generalSoundType == "BELL") 0 else 1)
 
-        spinnerType.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, pos: Int, id: Long) {
-                layoutMp3Path.visibility = if (pos == 1) android.view.View.VISIBLE else android.view.View.GONE
+        spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                layoutMp3Path.visibility = if (pos == 1) View.VISIBLE else View.GONE
             }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         editMp3Path.setText(settings.generalSoundMp3Path)
@@ -237,7 +238,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun importDatabase() {
         // Simple approach: show a dialog asking for the path
         // In a production app, you'd use SAF (Storage Access Framework)
-        val input = android.widget.EditText(this).apply {
+        val input = EditText(this).apply {
             hint = getString(R.string.backup_db_default_path)
             setText(getString(R.string.backup_db_default_path))
         }

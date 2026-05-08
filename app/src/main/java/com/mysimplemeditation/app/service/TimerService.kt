@@ -24,7 +24,7 @@ import com.mysimplemeditation.app.util.SettingsManager
 import com.mysimplemeditation.app.util.SilenceHelper
 import android.content.SharedPreferences
 import kotlinx.coroutines.*
-import java.util.Calendar
+import java.util.Locale
 
 class TimerService : Service() {
 
@@ -98,7 +98,7 @@ class TimerService : Service() {
         super.onCreate()
         db = AppDatabase.getInstance(this)
         settings = SettingsManager(this)
-        timerPrefs = getSharedPreferences("timer_state", Context.MODE_PRIVATE)
+        timerPrefs = getSharedPreferences("timer_state", MODE_PRIVATE)
         createNotificationChannel()
     }
 
@@ -262,7 +262,7 @@ class TimerService : Service() {
         }
     }
 
-    private suspend fun checkTriggers(sittingElapsed: Int) {
+    private fun checkTriggers(sittingElapsed: Int) {
         for (trigger in triggers) {
             // Skip START and END triggers - they are handled separately
             if (trigger.startTimeSeconds == TIME_START || trigger.startTimeSeconds == TIME_END) continue
@@ -471,7 +471,7 @@ class TimerService : Service() {
     }
 
     private fun acquireWakeLock() {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "MyMeditation::TimerWakeLock"
@@ -612,6 +612,6 @@ class TimerService : Service() {
         val h = totalSeconds / 3600
         val m = (totalSeconds % 3600) / 60
         val s = totalSeconds % 60
-        return String.format("%02d:%02d:%02d", h, m, s)
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
     }
 }
