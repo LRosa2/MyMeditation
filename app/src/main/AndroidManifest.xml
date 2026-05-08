@@ -7,6 +7,8 @@
         android:name="android.permission.FOREGROUND_SERVICE"
         android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -43,7 +45,15 @@
 
         <service
             android:name=".service.TimerService"
-            android:foregroundServiceType="mediaPlayback"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Meditation timer that triggers haptic feedback and bells at precise intervals during screen-off states to guide mindfulness sessions without user interaction." />
+        </service>
+
+        <receiver
+            android:name=".receiver.TriggerAlarmReceiver"
             android:exported="false" />
 
         <receiver

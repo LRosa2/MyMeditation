@@ -17,6 +17,7 @@ import com.mysimplemeditation.app.data.entities.LogEntryEntity
 import com.mysimplemeditation.app.data.entities.TriggerEntity
 import com.mysimplemeditation.app.data.entities.TriggerEntity.Companion.TIME_END
 import com.mysimplemeditation.app.data.entities.TriggerEntity.Companion.TIME_START
+import com.mysimplemeditation.app.receiver.TriggerAlarmReceiver
 import com.mysimplemeditation.app.ui.main.MainActivity
 import com.mysimplemeditation.app.util.AudioHelper
 import com.mysimplemeditation.app.util.SettingsManager
@@ -182,6 +183,7 @@ class TimerService : Service() {
             }
 
             saveTimerState()
+            TriggerAlarmReceiver.scheduleAll(this@TimerService, sessionId, triggers, startTimeMs, preparationSeconds, totalSittingSeconds)
             runTimerLoop()
         }
     }
@@ -190,6 +192,9 @@ class TimerService : Service() {
         timerJob = serviceScope.launch(Dispatchers.IO) {
             while (isActive) {
                 delay(1000)
+
+                // Reload fired triggers from prefs in case the alarm receiver fired them while we were frozen
+                reloadFiredTriggersFromPrefs()
 
                 // Wall-clock synchronized elapsed time
                 val rawElapsedMs = System.currentTimeMillis() - startTimeMs
@@ -224,6 +229,11 @@ class TimerService : Service() {
                 }
                 if (sittingElapsed > 0) {
                     checkTriggers(sittingElapsed)
+                }
+
+                // Also check END trigger if sitting elapsed has reached total duration
+                if (isClosedSession && sittingElapsed >= totalSittingSeconds - 1) {
+                    executeEndTriggers()
                 }
 
                 // Send tick broadcast
@@ -363,6 +373,7 @@ class TimerService : Service() {
         lastRemaining = 0
         lastElapsed = 0
         lastPhase = ""
+        TriggerAlarmReceiver.cancelAll(this, triggers)
         sendBroadcast(Intent(ACTION_ENDED).setPackage(packageName))
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -377,6 +388,7 @@ class TimerService : Service() {
 
     private fun stopTimer() {
         serviceScope.launch {
+            TriggerAlarmReceiver.cancelAll(this@TimerService, triggers)
             executeEndTriggers()
             logSession()
             timerJob?.cancel()
@@ -409,6 +421,7 @@ class TimerService : Service() {
             isPaused = true
             pauseStartMs = System.currentTimeMillis()
             segmentStartTimeMs = 0
+            TriggerAlarmReceiver.cancelAll(this@TimerService, triggers)
             saveTimerState()
             sendBroadcast(Intent(ACTION_PAUSED).setPackage(packageName))
             updateNotification("Paused")
@@ -424,6 +437,8 @@ class TimerService : Service() {
         segmentStartTimeMs = System.currentTimeMillis()
         segmentStartElapsed = elapsedSeconds
         saveTimerState()
+        val remainingTriggers = triggers.filter { it.id !in firedTriggers }
+        TriggerAlarmReceiver.scheduleAll(this, sessionId, remainingTriggers, startTimeMs, preparationSeconds, totalSittingSeconds)
         sendBroadcast(Intent(ACTION_RESUMED).setPackage(packageName))
         runTimerLoop()
     }
@@ -572,6 +587,8 @@ class TimerService : Service() {
             acquireWakeLock()
             startForeground(NOTIFICATION_ID, buildNotification("Recovering meditation..."))
 
+            TriggerAlarmReceiver.scheduleAll(this@TimerService, sessionId, triggers, startTimeMs, preparationSeconds, totalSittingSeconds)
+
             sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
             isRunning = true
 
@@ -580,6 +597,14 @@ class TimerService : Service() {
             } else {
                 updateNotification("Paused")
             }
+        }
+    }
+
+    private fun reloadFiredTriggersFromPrefs() {
+        val firedStr = timerPrefs.getString("fired_triggers", "") ?: ""
+        firedTriggers.clear()
+        if (firedStr.isNotEmpty()) {
+            firedTriggers.addAll(firedStr.split(",").mapNotNull { it.toLongOrNull() })
         }
     }
 

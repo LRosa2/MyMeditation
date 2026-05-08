@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mysimplemeditation.app.R
 import com.mysimplemeditation.app.data.AppDatabase
 import com.mysimplemeditation.app.databinding.ActivitySettingsBinding
+import com.mysimplemeditation.app.util.BatteryOptimizationHelper
 import com.mysimplemeditation.app.util.DatabaseExporter
 import com.mysimplemeditation.app.util.SettingsManager
 import kotlinx.coroutines.launch
@@ -54,6 +55,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.chkRememberVolume.isChecked = settings.rememberVolume
         binding.chkPlayAsAlarm.isChecked = settings.playAsAlarm
         binding.chkAutoSilence.isChecked = settings.autoSilencePhone
+        binding.chkHighReliabilityMode.isChecked = !BatteryOptimizationHelper.isBatteryOptimized(this)
 
         // Time format
         if (settings.is24Hour()) {
@@ -98,6 +100,16 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.btnExportDb.setOnClickListener { exportDatabase() }
         binding.btnImportDb.setOnClickListener { importDatabase() }
+        binding.chkHighReliabilityMode.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && BatteryOptimizationHelper.isBatteryOptimized(this)) {
+                BatteryOptimizationHelper.requestExemption(this)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.chkHighReliabilityMode.isChecked = !BatteryOptimizationHelper.isBatteryOptimized(this)
     }
 
     private fun showSoundConfigDialog() {

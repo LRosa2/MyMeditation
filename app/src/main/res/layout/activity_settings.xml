@@ -28,6 +28,22 @@
         android:layout_height="wrap_content"
         android:text="@string/auto_silence"
         android:textColor="@color/meditation_text"
+        android:layout_marginBottom="8dp" />
+
+    <CheckBox
+        android:id="@+id/chkHighReliabilityMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="High Reliability Mode"
+        android:textColor="@color/meditation_text"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Prevents Android from silencing bells or stopping the timer during long sessions. Recommended for sessions over 15 minutes."
+        android:textColor="@color/meditation_text"
+        android:textSize="12sp"
         android:layout_marginBottom="16dp" />
 
     <TextView
