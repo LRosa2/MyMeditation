@@ -136,7 +136,7 @@ class TriggerAlarmReceiver : BroadcastReceiver() {
 
         executeTrigger(context, trigger, volume, useAlarm, globalMode)
 
-        if (isEndTrigger) {
+        if (isEndTrigger && !TimerService.isRunning) {
             logAndEndSession(context, sessionId, startTimeMs, preparationSeconds, totalSittingSeconds, totalPauseMs, timerPrefs)
         }
 

@@ -542,6 +542,8 @@ class TimerService : Service() {
             putLong("total_pause_ms", totalPauseDurationMs)
             putBoolean("is_paused", isPaused)
             putString("fired_triggers", firedTriggers.joinToString(","))
+            putLong("segment_start_ms", segmentStartTimeMs)
+            putInt("segment_start_elapsed", segmentStartElapsed)
             apply()
         }
     }
@@ -583,6 +585,8 @@ class TimerService : Service() {
             startTimeMs = timerPrefs.getLong("start_time_ms", System.currentTimeMillis())
             totalPauseDurationMs = timerPrefs.getLong("total_pause_ms", 0L)
             isPaused = timerPrefs.getBoolean("is_paused", false)
+            segmentStartTimeMs = timerPrefs.getLong("segment_start_ms", 0L)
+            segmentStartElapsed = timerPrefs.getInt("segment_start_elapsed", 0)
 
             acquireWakeLock()
             startForeground(NOTIFICATION_ID, buildNotification("Recovering meditation..."))
