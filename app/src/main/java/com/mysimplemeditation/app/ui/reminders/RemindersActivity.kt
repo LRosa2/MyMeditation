@@ -97,7 +97,8 @@ class RemindersActivity : AppCompatActivity() {
 
     private fun updateReminder(reminder: ReminderEntity, enabled: Boolean) {
         lifecycleScope.launch {
-            db.reminderDao().updateReminder(reminder.copy(enabled = enabled))
+            val updatedReminder = reminder.copy(enabled = enabled)
+            db.reminderDao().updateReminder(updatedReminder)
             if (enabled) {
                 // Check alarm permission before scheduling
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -106,9 +107,9 @@ class RemindersActivity : AppCompatActivity() {
                         requestAlarmPermission()
                     }
                 }
-                ReminderReceiver.schedule(this@RemindersActivity, reminder)
+                ReminderReceiver.schedule(this@RemindersActivity, updatedReminder)
             } else {
-                ReminderReceiver.cancel(this@RemindersActivity, reminder)
+                ReminderReceiver.cancel(this@RemindersActivity, updatedReminder)
             }
             loadReminders()
         }
