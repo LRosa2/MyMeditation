@@ -7,19 +7,10 @@
     android:gravity="center_horizontal"
     android:padding="24dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/meditation_primary"
-        android:layout_marginBottom="24dp" />
-
     <Spinner
         android:id="@+id/spinnerSession"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="16dp" />
 
     <TextView
@@ -60,7 +51,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnStart"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:text="@string/start"
             android:textSize="18sp"
@@ -72,7 +63,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnStop"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:text="@string/stop"
             android:textSize="18sp"
