@@ -1,6 +1,8 @@
 package com.mysimplemeditation.app.ui.reminders
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -110,13 +112,44 @@ class ReminderEditActivity : AppCompatActivity() {
                 reminderId = db.reminderDao().insertReminder(reminder)
             }
 
+            val reminderWithId = reminder.copy(id = reminderId)
+
             if (enabled) {
-                ReminderReceiver.schedule(this@ReminderEditActivity, reminder.copy(id = reminderId))
+                // Check exact alarm permission before scheduling
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (!ReminderReceiver.hasExactAlarmPermission(this@ReminderEditActivity)) {
+                        requestAlarmPermission(reminderWithId)
+                        return@launch
+                    }
+                }
+                ReminderReceiver.schedule(this@ReminderEditActivity, reminderWithId)
             } else {
-                ReminderReceiver.cancel(this@ReminderEditActivity, reminder.copy(id = reminderId))
+                ReminderReceiver.cancel(this@ReminderEditActivity, reminderWithId)
             }
 
             finish()
+        }
+    }
+
+    private fun requestAlarmPermission(reminder: ReminderEntity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlertDialog.Builder(this)
+                .setTitle("Exact Alarm Permission Required")
+                .setMessage("For reliable reminders at ${String.format("%02d:%02d", reminder.timeHour, reminder.timeMinute)}, please grant exact alarm permission in the next screen. Without this permission, reminders may not fire reliably.")
+                .setPositiveButton("Grant Permission") { _, _ ->
+                    val intent = android.content.Intent(
+                        android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        android.net.Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                    // Schedule anyway with best available method
+                    ReminderReceiver.schedule(this, reminder)
+                }
+                .setNegativeButton("Skip") { _, _ ->
+                    // Schedule anyway with best available method (will use inexact fallback)
+                    ReminderReceiver.schedule(this, reminder)
+                }
+                .show()
         }
     }
 }

@@ -26,8 +26,18 @@ class ReminderReceiver : BroadcastReceiver() {
         private const val CHANNEL_ID = "mymeditation_reminders"
         private const val EXTRA_REMINDER_ID = "reminder_id"
 
+        fun hasExactAlarmPermission(context: Context): Boolean {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
+        }
+
         fun schedule(context: Context, reminder: ReminderEntity) {
             if (!reminder.enabled) {
+                Log.d(TAG, "Reminder ${reminder.id} is disabled, cancelling instead of scheduling")
                 cancel(context, reminder)
                 return
             }
@@ -57,30 +67,27 @@ class ReminderReceiver : BroadcastReceiver() {
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
 
-            val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                alarmManager.canScheduleExactAlarms()
-            } else {
-                true
-            }
+            val canExact = hasExactAlarmPermission(context)
 
             try {
                 if (canExact) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                    Log.d(TAG, "Scheduled exact alarm for reminder ${reminder.id} at ${calendar.time}")
+                    // Use setAlarmClock for maximum reliability - shows alarm icon in status bar
+                    // This is the most reliable way to wake the device from Doze
+                    val alarmTime = calendar.timeInMillis
+                    val info = AlarmManager.AlarmClockInfo(alarmTime, pendingIntent)
+                    alarmManager.setAlarmClock(info, pendingIntent)
+                    Log.d(TAG, "Scheduled AlarmClock for reminder ${reminder.id} at ${calendar.time} (reliable)")
                 } else {
+                    // Fallback to inexact alarm - less reliable
                     alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
                     )
-                    Log.d(TAG, "Scheduled inexact alarm for reminder ${reminder.id} at ${calendar.time} (no exact permission)")
+                    Log.w(TAG, "Scheduled inexact alarm for reminder ${reminder.id} at ${calendar.time} (NO EXACT PERMISSION - unreliable!)")
                 }
             } catch (e: SecurityException) {
-                Log.e(TAG, "Cannot schedule exact alarm for reminder ${reminder.id}, falling back to inexact", e)
+                Log.e(TAG, "SecurityException scheduling reminder ${reminder.id}, falling back to inexact", e)
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
@@ -133,11 +140,20 @@ class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val reminderId = intent.getLongExtra(EXTRA_REMINDER_ID, -1)
-        if (reminderId < 0) return
+        Log.d(TAG, "onReceive triggered for reminderId=$reminderId")
+        if (reminderId < 0) {
+            Log.w(TAG, "Invalid reminderId, ignoring")
+            return
+        }
 
         scope.launch {
             val db = AppDatabase.getInstance(context)
-            val reminder = db.reminderDao().getReminderById(reminderId) ?: return@launch
+            val reminder = db.reminderDao().getReminderById(reminderId)
+            if (reminder == null) {
+                Log.w(TAG, "Reminder $reminderId not found in database")
+                return@launch
+            }
+            Log.d(TAG, "Found reminder: id=${reminder.id}, msg='${reminder.message}', threshold=${reminder.thresholdMinutes}min, enabled=${reminder.enabled}")
 
             // Check threshold: only show if meditation today < threshold
             val now = Calendar.getInstance()
@@ -152,14 +168,19 @@ class ReminderReceiver : BroadcastReceiver() {
                 startOfDay.timeInMillis,
                 now.timeInMillis
             ) ?: 0
-
             val totalMinutesToday = totalSecondsToday / 60
 
+            Log.d(TAG, "Threshold check: totalMinutesToday=$totalMinutesToday, threshold=${reminder.thresholdMinutes}, shouldNotify=${totalMinutesToday < reminder.thresholdMinutes}")
+
             if (totalMinutesToday < reminder.thresholdMinutes) {
+                Log.d(TAG, "Threshold not met, showing notification for reminder ${reminder.id}")
                 showNotification(context, reminder)
+            } else {
+                Log.d(TAG, "Threshold met (${totalMinutesToday} >= ${reminder.thresholdMinutes}), skipping notification")
             }
 
             // Reschedule for tomorrow
+            Log.d(TAG, "Rescheduling reminder ${reminder.id} for tomorrow")
             schedule(context, reminder)
         }
     }

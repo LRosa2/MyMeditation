@@ -3,6 +3,7 @@ package com.mysimplemeditation.app.ui.settings
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mysimplemeditation.app.R
 import com.mysimplemeditation.app.databinding.ActivitySettingsBinding
 import com.mysimplemeditation.app.util.AudioHelper
+import com.mysimplemeditation.app.receiver.ReminderReceiver
 import com.mysimplemeditation.app.util.BatteryOptimizationHelper
 import com.mysimplemeditation.app.util.DatabaseExporter
 import com.mysimplemeditation.app.util.SettingsManager
@@ -55,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.chkPlayAsAlarm.isChecked = settings.playAsAlarm
         binding.chkAutoSilence.isChecked = settings.autoSilencePhone
         binding.chkHighReliabilityMode.isChecked = !BatteryOptimizationHelper.isBatteryOptimized(this)
+        binding.chkExactAlarmPermission.isChecked = ReminderReceiver.hasExactAlarmPermission(this)
 
         // Time format
         if (settings.is24Hour()) {
@@ -104,11 +107,41 @@ class SettingsActivity : AppCompatActivity() {
                 BatteryOptimizationHelper.requestExemption(this)
             }
         }
+
+        binding.chkExactAlarmPermission.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && !ReminderReceiver.hasExactAlarmPermission(this)) {
+                requestExactAlarmPermission()
+            }
+        }
+    }
+
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlertDialog.Builder(this)
+                .setTitle("Exact Alarm Permission")
+                .setMessage("This permission allows reminders to fire at the exact time you set, even when your phone is in Doze mode. Without it, reminders may be delayed by several minutes.")
+                .setPositiveButton("Grant Permission") { _, _ ->
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        android.net.Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                }
+                .setNegativeButton("Cancel") { _, _ ->
+                    binding.chkExactAlarmPermission.isChecked = false
+                }
+                .show()
+        } else {
+            // Below Android 12, permission is granted by default
+            binding.chkExactAlarmPermission.isChecked = true
+            Toast.makeText(this, "Exact alarms are automatically allowed on this Android version", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         binding.chkHighReliabilityMode.isChecked = !BatteryOptimizationHelper.isBatteryOptimized(this)
+        binding.chkExactAlarmPermission.isChecked = ReminderReceiver.hasExactAlarmPermission(this)
     }
 
     private fun showSoundConfigDialog() {

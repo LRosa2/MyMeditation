@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -59,6 +60,14 @@ class RemindersActivity : AppCompatActivity() {
         binding.recyclerReminders.layoutManager = LinearLayoutManager(this)
         binding.recyclerReminders.adapter = adapter
 
+        // Exact alarm permission checkbox
+        binding.chkExactAlarmPermission.isChecked = ReminderReceiver.hasExactAlarmPermission(this)
+        binding.chkExactAlarmPermission.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked && !ReminderReceiver.hasExactAlarmPermission(this)) {
+                requestExactAlarmPermission()
+            }
+        }
+
         binding.btnAddReminder.setOnClickListener {
             requestNotificationPermission()
             startActivity(Intent(this, ReminderEditActivity::class.java))
@@ -67,9 +76,32 @@ class RemindersActivity : AppCompatActivity() {
         loadReminders()
     }
 
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlertDialog.Builder(this)
+                .setTitle("Exact Alarm Permission")
+                .setMessage("This permission allows reminders to fire at the exact time you set. Without it, reminders may be delayed by several minutes when your phone is idle.")
+                .setPositiveButton("Grant Permission") { _, _ ->
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        android.net.Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                }
+                .setNegativeButton("Cancel") { _, _ ->
+                    binding.chkExactAlarmPermission.isChecked = false
+                }
+                .show()
+        } else {
+            binding.chkExactAlarmPermission.isChecked = true
+            android.widget.Toast.makeText(this, "Exact alarms are automatically allowed on this Android version", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         loadReminders()
+        binding.chkExactAlarmPermission.isChecked = ReminderReceiver.hasExactAlarmPermission(this)
     }
 
     override fun onSupportNavigateUp(): Boolean {

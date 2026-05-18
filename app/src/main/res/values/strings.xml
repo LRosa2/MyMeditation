@@ -143,6 +143,11 @@
     <string name="configure_vibration">Configure Vibration</string>
     <string name="backup_db_default_path">/storage/emulated/0/Documents/MyMeditation/mymeditation_backup.db</string>
 
+    <!-- Exact Alarm Permission -->
+    <string name="exact_alarm_permission">Exact Alarm Permission</string>
+    <string name="exact_alarm_permission_description">Allows reminders to fire at the exact time you set, even when your phone is in Doze mode. Without this permission, reminders may be delayed by several minutes.</string>
+    <string name="exact_alarm_permission_short_desc">Required for reliable reminders at the exact time you set</string>
+
     <!-- About -->
     <string name="app_author">Luis Rosa</string>
     <string name="support_email">luisribeirosa at gmail.com</string>

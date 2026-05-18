@@ -12,8 +12,8 @@ android {
         applicationId = "com.mysimplemeditation.app"
         minSdk = 31
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.1.6"
+        versionCode = 9
+        versionName = "1.1.7"
     }
 
     buildTypes {

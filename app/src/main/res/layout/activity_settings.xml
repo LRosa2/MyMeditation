@@ -45,6 +45,22 @@
         android:textSize="12sp"
         android:layout_marginBottom="16dp" />
 
+    <CheckBox
+        android:id="@+id/chkExactAlarmPermission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/exact_alarm_permission"
+        android:textColor="@color/meditation_text"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/exact_alarm_permission_description"
+        android:textColor="@color/meditation_text"
+        android:textSize="12sp"
+        android:layout_marginBottom="16dp" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
